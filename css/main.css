@@ -1,0 +1,182 @@
+.pdf-mini-viewer {
+  position: relative;
+  display: block;
+  max-width: 1200px;
+  margin: 0 auto;
+  overflow: hidden;
+}
+.pdf-mini-viewer .pdf-main-toolbar {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  height: 50px;
+  line-height: 0;
+  background-color: #323639;
+  color: #f1f1f1;
+}
+.pdf-mini-viewer .pdf-main-toolbar .pdf-icon,
+.pdf-mini-viewer .pdf-main-toolbar svg.pdf-icon {
+  fill: #f1f1f1;
+}
+.pdf-mini-viewer .pdf-main-toolbar .pdf-icon:hover,
+.pdf-mini-viewer .pdf-main-toolbar svg.pdf-icon:hover {
+  cursor: pointer;
+}
+.pdf-mini-viewer .pdf-main-toolbar .page-up {
+  width: 40px;
+  margin-left: 15px;
+  cursor: pointer;
+}
+.pdf-mini-viewer .pdf-main-toolbar .page-down {
+  width: 40px;
+  cursor: pointer;
+}
+.pdf-mini-viewer .pdf-main-toolbar .page-wrapper {
+  flex: 1;
+  margin: 0 15px;
+  font-family: monospace;
+  font-size: 15px;
+}
+.pdf-mini-viewer .pdf-main-toolbar .page-wrapper .current-page {
+  -moz-appearance: textfield;
+  outline-style: none;
+  text-align: right;
+  width: 40px;
+  padding: 3px 5px;
+  border-radius: 2px;
+  border: 1px solid #777c81;
+  background-color: #525659;
+  font-family: monospace;
+  font-size: 15px;
+  color: #f1f1f1;
+}
+.pdf-mini-viewer .pdf-main-toolbar .page-wrapper .current-page::-webkit-outer-spin-button,
+.pdf-mini-viewer .pdf-main-toolbar .page-wrapper .current-page::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.pdf-mini-viewer .pdf-main-toolbar .download {
+  width: 40px;
+  margin-right: 15px;
+  cursor: pointer;
+}
+.pdf-mini-viewer .pdf-main-toolbar .print {
+  width: 40px;
+  margin-right: 15px;
+  cursor: pointer;
+}
+.pdf-mini-viewer .pdf-main-toolbar .bookmark {
+  width: 40px;
+  margin-right: 15px;
+  cursor: pointer;
+}
+.pdf-mini-viewer .pdf-viewer {
+  overflow: auto;
+  padding: 15px 0;
+  background-color: #525659;
+}
+.pdf-mini-viewer .pdf-resize-toolbar {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  height: 50px;
+  line-height: 0;
+  background-color: #323639;
+}
+.pdf-mini-viewer .pdf-resize-toolbar .pdf-icon,
+.pdf-mini-viewer .pdf-resize-toolbar svg.pdf-icon {
+  fill: #f1f1f1;
+}
+.pdf-mini-viewer .pdf-resize-toolbar .pdf-icon:hover,
+.pdf-mini-viewer .pdf-resize-toolbar svg.pdf-icon:hover {
+  cursor: pointer;
+}
+.pdf-mini-viewer .pdf-resize-toolbar .zoom-reset {
+  display: none;
+}
+.pdf-mini-viewer .pdf-resize-toolbar .zoom-expand {
+  display: none;
+}
+.pdf-mini-viewer .pdf-resize-toolbar .zoom-compress {
+  display: none;
+}
+.pdf-mini-viewer .pdf-resize-toolbar .zoom-in {
+  flex: 1;
+  text-align: center;
+}
+.pdf-mini-viewer .pdf-resize-toolbar .zoom-out {
+  flex: 1;
+  text-align: center;
+}
+.pdf-mini-viewer .pdf-outline {
+  position: absolute;
+  top: 50px;
+  right: -350px;
+  bottom: 0;
+  z-index: 100;
+  width: 300px;
+  overflow-y: auto;
+  background-color: #323639;
+  padding: 15px;
+  font-size: 15px;
+  transition: right 0.55s linear;
+}
+.pdf-mini-viewer .pdf-outline ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  color: #f1f1f1;
+}
+.pdf-mini-viewer .pdf-outline ul li {
+  display: grid;
+  grid-template-columns: 30px 1fr;
+  grid-template-rows: auto auto;
+  grid-template-areas: "toggle link" "nested nested";
+}
+.pdf-mini-viewer .pdf-outline ul li.open > ul {
+  display: block;
+}
+.pdf-mini-viewer .pdf-outline ul li.open > .toggle .close .pdf-icon {
+  display: none;
+}
+.pdf-mini-viewer .pdf-outline ul li.open > .toggle .open .pdf-icon {
+  display: block;
+}
+.pdf-mini-viewer .pdf-outline ul ul {
+  display: none;
+  margin-left: 15px;
+  grid-area: nested;
+}
+.pdf-mini-viewer .pdf-outline ul a,
+.pdf-mini-viewer .pdf-outline ul .heading {
+  text-decoration: none;
+  border-radius: 5px;
+  color: #f1f1f1;
+  grid-area: link;
+  padding: 5px 3px;
+}
+.pdf-mini-viewer .pdf-outline ul a:hover,
+.pdf-mini-viewer .pdf-outline ul .heading:hover {
+  background-color: #525659;
+}
+.pdf-mini-viewer .pdf-outline ul .toggle {
+  display: flex;
+  align-items: center;
+  grid-area: toggle;
+}
+.pdf-mini-viewer .pdf-outline ul .toggle .pdf-icon,
+.pdf-mini-viewer .pdf-outline ul .toggle svg.pdf-icon {
+  fill: #f1f1f1;
+  width: 14px;
+  height: 14px;
+}
+.pdf-mini-viewer .pdf-outline ul .toggle .pdf-icon:hover,
+.pdf-mini-viewer .pdf-outline ul .toggle svg.pdf-icon:hover {
+  cursor: pointer;
+}
+.pdf-mini-viewer .pdf-outline ul .toggle .open .pdf-icon {
+  display: none;
+}
+.pdf-mini-viewer.bookmarks-open .pdf-outline {
+  right: 0;
+}
