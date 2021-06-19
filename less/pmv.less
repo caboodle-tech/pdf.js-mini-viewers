@@ -58,14 +58,6 @@
                     margin: 0;
                 }
             }
-            
-            .page-spacer {
-            
-            }
-            
-            .page-total {
-            
-            }
         }
         
         .download {
@@ -103,6 +95,7 @@
 
         .pdf-icon, svg.pdf-icon {
             fill: #f1f1f1;
+            color: #f1f1f1;
 
             &:hover {
                 cursor: pointer;
@@ -124,11 +117,13 @@
         .zoom-in {
             flex: 1;
             text-align: center;
+            cursor: pointer;
         }
 
         .zoom-out {
             flex: 1;
             text-align: center;
+            cursor: pointer;
         }
     }
 
@@ -224,6 +219,155 @@
     &.bookmarks-open {
         .pdf-outline {
             right: 0;
+        }
+    }
+
+    @media ( min-width: 768px ) {
+        .pdf-resize-toolbar {
+            display: block;
+            position: absolute;
+            bottom: 15px;
+            right: 0;
+            height: initial;
+            width: 55px;
+            background-color: initial;
+            pointer-events: none;
+
+            .button {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                cursor: pointer;
+                background-color: #f2f2f2;
+                border-radius: 50%;
+                width: 35px;
+                height: 35px;
+                line-height: 35px;
+                margin-bottom: 15px;
+                pointer-events: auto;
+                .drop-shadow();
+
+                .pdf-icon, svg.pdf-icon {
+                    fill: #525659;
+                    color: #525659;
+                    width: 16px;
+                    height: 16px;
+                }
+            }
+    
+            .zoom-reset {
+                display: flex;
+                opacity: 0;
+                pointer-events: none;
+                transition: opacity .25s linear;
+            }
+
+            .zoom-expand {
+                display: none;
+            }
+    
+            .zoom-compress {
+                display: none;
+            }
+    
+            .zoom-in {
+                flex: 1;
+                text-align: center;
+                cursor: pointer;
+            }
+    
+            .zoom-out {
+                flex: 1;
+                text-align: center;
+                cursor: pointer;
+            }
+
+            &.zoomed {
+                .zoom-reset {
+                    pointer-events: auto;
+                    opacity: 1;
+                }
+            }
+        }
+    }
+
+    @media ( min-width: 1024px ) {
+        .pdf-resize-toolbar {
+            display: block;
+            position: absolute;
+            bottom: 15px;
+            right: 0;
+            height: initial;
+            width: 65px;
+            background-color: initial;
+            pointer-events: none;
+
+            .button {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                background-color: #f2f2f2;
+                border-radius: 50%;
+                width: 35px;
+                height: 35px;
+                line-height: 35px;
+                margin-bottom: 15px;
+                pointer-events: auto;
+                .drop-shadow();
+
+                .pdf-icon, svg.pdf-icon {
+                    fill: #525659;
+                    color: #525659;
+                    width: 16px;
+                    height: 16px;
+                }
+            }
+    
+            .zoom-reset {
+                display: flex;
+                opacity: 0;
+                pointer-events: none;
+                transition: opacity .25s linear;
+            }
+
+            .zoom-expand {
+                display: none;
+            }
+    
+            .zoom-compress {
+                display: none;
+            }
+    
+            .zoom-in {
+                flex: 1;
+                text-align: center;
+                cursor: pointer;
+            }
+    
+            .zoom-out {
+                flex: 1;
+                text-align: center;
+                cursor: pointer;
+            }
+
+            &.page-actual {
+                .zoom-compress {
+                    display: flex;
+                }
+            }
+
+            &.page-fit {
+                .zoom-expand {
+                    display: flex;
+                }
+            }
+
+            &.zoomed {
+                .zoom-reset {
+                    pointer-events: auto;
+                    opacity: 1;
+                }
+            }
         }
     }
 }
