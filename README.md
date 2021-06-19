@@ -9,4 +9,4 @@ PMV is licensed as: MIT
 PDFJS is licensed: Apache-2.0
 
 ## Alpha
-This application is currently in alpha development. Please see the [Version 1.0 Release](https://github.com/caboodle-tech/pdf.js-mini-viewers/projects) project board for a road map of where things are. Contributions welcome!
+This application is currently in alpha development. Please see the [Version 1.0 Release](https://github.com/caboodle-tech/pdf.js-mini-viewers/projects) project board for a road map of where things are. Contributions are welcome!
