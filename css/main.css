@@ -75,6 +75,21 @@
   padding: 15px 0;
   background-color: #525659;
 }
+.pdf-mini-viewer .pdf-viewer .page section body,
+.pdf-mini-viewer .pdf-viewer .page section input,
+.pdf-mini-viewer .pdf-viewer .page section select,
+.pdf-mini-viewer .pdf-viewer .page section button {
+  font-size: 90%;
+  outline: none;
+}
+.pdf-mini-viewer .pdf-viewer .page section input[type="checkbox"]:before,
+.pdf-mini-viewer .pdf-viewer .page section input[type="checkbox"]:checked:before {
+  width: 1.5px;
+}
+.pdf-mini-viewer .pdf-viewer .page section input[type="checkbox"]:after,
+.pdf-mini-viewer .pdf-viewer .page section input[type="checkbox"]:checked:after {
+  width: 1.5px;
+}
 .pdf-mini-viewer .pdf-resize-toolbar {
   display: flex;
   flex-direction: row;

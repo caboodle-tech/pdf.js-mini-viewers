@@ -433,11 +433,9 @@ var PDFMiniViewers = ( function() {
                 }
                 return [ elem, 'buttonWidgetAnnotation checkBox' ];
             case 'CH':
-                console.log(data);
                 var elem = document.createElement('SELECT');
                 elem.id = data.id;
                 elem.setAttribute( 'name', data.fieldName );
-                elem.setAttribute( 'value', data.fieldValue );
                 if ( data.multiSelect ) {
                     elem.setAttribute( 'multiple', '' );
                 }
@@ -607,6 +605,7 @@ var PDFMiniViewers = ( function() {
         var renderContext = {
             canvasContext: canvas.getContext('2d'),
             viewport: viewport,
+            renderInteractiveForms: true
         };
         PDFPageProxy.render( renderContext );
 
@@ -686,6 +685,7 @@ var PDFMiniViewers = ( function() {
         var renderContext = {
             canvasContext: newCanvas.getContext('2d'),
             viewport: viewport,
+            renderInteractiveForms: true
         };
         PDFPageProxy.render( renderContext );
 
