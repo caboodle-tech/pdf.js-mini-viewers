@@ -194,7 +194,28 @@ var PDFMiniViewers = ( function() {
     };
 
     var eventPrint = function() {
-
+        var mini = this.closest('.pdf-mini-viewer');
+        var pdf  = PDFS[ mini.id ];
+        console.log( pdf.annotationStorage );
+        pdf.saveDocument( pdf.annotationStorage ).then(
+            // Success.
+            function( data ) {
+                // Get the PDF as a blob.
+                var getUrl = window.location;
+                var url = getUrl.protocol + "//" + getUrl.host + "/" + getUrl.pathname.split('/')[1];
+                var blob = new Blob( [data], { type: "application/pdf" } );
+                var url = URL.createObjectURL( blob );
+                // Open it in a new tab and let the browser render it for printing.
+                var a = document.createElement("A");
+                a.target = '_blank';
+                a.href = url;
+                a.click();
+            },
+            // Error.
+            function( e ) {
+                console.error( e );
+            }
+        );
     };
 
     var eventZoomCompress = function() {
