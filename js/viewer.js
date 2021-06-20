@@ -196,7 +196,8 @@ var PDFMiniViewers = ( function() {
     var eventPrint = function() {
         var mini = this.closest('.pdf-mini-viewer');
         var pdf  = PDFS[ mini.id ];
-        console.log( pdf.annotationStorage );
+        // TODO: This will work to print BUT it will not save any form data yet!
+        // TODO: Implement updated to pdf.annotationStorage when form fields are filled out.
         pdf.saveDocument( pdf.annotationStorage ).then(
             // Success.
             function( data ) {
