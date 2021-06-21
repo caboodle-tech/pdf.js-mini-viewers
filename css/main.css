@@ -325,3 +325,629 @@
     opacity: 1;
   }
 }
+/* Copyright 2014 Mozilla Foundation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+.page {
+  position: relative;
+  margin: 15px auto;
+  direction: ltr;
+  width: 816px;
+  height: 1056px;
+  overflow: visible;
+  background-color: #ffffff;
+  -webkit-box-shadow: 0px 1px 3px 3px rgba(0, 0, 0, 0.2);
+  box-shadow: 0px 1px 3px 3px rgba(0, 0, 0, 0.2);
+  /* Copyright 2014 Mozilla Foundation
+     *
+     * Licensed under the Apache License, Version 2.0 (the "License");
+     * you may not use this file except in compliance with the License.
+     * You may obtain a copy of the License at
+     *
+     *     http://www.apache.org/licenses/LICENSE-2.0
+     *
+     * Unless required by applicable law or agreed to in writing, software
+     * distributed under the License is distributed on an "AS IS" BASIS,
+     * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     * See the License for the specific language governing permissions and
+     * limitations under the License.
+     */
+  /* Copyright 2021 Mozilla Foundation
+     *
+     * Licensed under the Apache License, Version 2.0 (the "License");
+     * you may not use this file except in compliance with the License.
+     * You may obtain a copy of the License at
+     *
+     *     http://www.apache.org/licenses/LICENSE-2.0
+     *
+     * Unless required by applicable law or agreed to in writing, software
+     * distributed under the License is distributed on an "AS IS" BASIS,
+     * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     * See the License for the specific language governing permissions and
+     * limitations under the License.
+     */
+}
+.page .text-layer {
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+  opacity: 0.2;
+  line-height: 1;
+}
+.page .text-layer > span {
+  color: transparent;
+  position: absolute;
+  white-space: pre;
+  cursor: text;
+  transform-origin: 0% 0%;
+}
+.page .text-layer .highlight {
+  margin: -1px;
+  padding: 1px;
+  background-color: #b400aa;
+  border-radius: 4px;
+}
+.page .text-layer .highlight.begin {
+  border-radius: 4px 0 0 4px;
+}
+.page .text-layer .highlight.end {
+  border-radius: 0 4px 4px 0;
+}
+.page .text-layer .highlight.middle {
+  border-radius: 0;
+}
+.page .text-layer .highlight.selected {
+  background-color: #006400;
+}
+.page .text-layer::-moz-selection {
+  background: #0000ff;
+}
+.page .text-layer::selection {
+  background: #0000ff;
+}
+.page .text-layer .endOfContent {
+  display: block;
+  position: absolute;
+  left: 0;
+  top: 100%;
+  right: 0;
+  bottom: 0;
+  z-index: -1;
+  cursor: default;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+}
+.page .text-layer .endOfContent.active {
+  top: 0;
+}
+.page .annotation-layer {
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+}
+.page .annotation-layer section {
+  position: absolute;
+  text-align: initial;
+}
+.page .annotation-layer .link-annotation > a {
+  position: absolute;
+  font-size: 1em;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  color: transparent;
+}
+.page .annotation-layer .link-annotation > a:hover {
+  opacity: 0.2;
+  background: #ffff00;
+  box-shadow: 0 2px 10px #ffff00;
+}
+.page .annotation-layer .buttonWidgetAnnotation.pushButton > a {
+  position: absolute;
+  font-size: 1em;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+.page .annotation-layer .buttonWidgetAnnotation.pushButton > a:hover {
+  opacity: 0.2;
+  background: #ffff00;
+  box-shadow: 0 2px 10px #ffff00;
+}
+.page .annotation-layer .textAnnotation img {
+  position: absolute;
+  cursor: pointer;
+}
+.page .annotation-layer .textWidgetAnnotation input {
+  background-color: rgba(0, 54, 255, 0.13);
+  border: 1px solid transparent;
+  box-sizing: border-box;
+  font-size: 9px;
+  height: 100%;
+  margin: 0;
+  padding: 0 3px;
+  vertical-align: top;
+  width: 100%;
+}
+.page .annotation-layer .textWidgetAnnotation input:hover {
+  border: 1px solid #000000;
+}
+.page .annotation-layer .textWidgetAnnotation input:focus {
+  background: none;
+  border: 1px solid transparent;
+}
+.page .annotation-layer .textWidgetAnnotation textarea {
+  background-color: rgba(0, 54, 255, 0.13);
+  border: 1px solid transparent;
+  box-sizing: border-box;
+  height: 100%;
+  margin: 0;
+  padding: 0 3px;
+  vertical-align: top;
+  width: 100%;
+  font: message-box;
+  font-size: 9px;
+  resize: none;
+}
+.page .annotation-layer .textWidgetAnnotation textarea:hover {
+  border: 1px solid #000000;
+}
+.page .annotation-layer .textWidgetAnnotation textarea:focus {
+  background: none;
+  border: 1px solid transparent;
+}
+.page .annotation-layer .textWidgetAnnotation input[disabled] {
+  background: none;
+  border: 1px solid transparent;
+  cursor: not-allowed;
+}
+.page .annotation-layer .textWidgetAnnotation textarea[disabled] {
+  background: none;
+  border: 1px solid transparent;
+  cursor: not-allowed;
+}
+.page .annotation-layer .textWidgetAnnotation input.comb {
+  font-family: monospace;
+  padding-left: 2px;
+  padding-right: 0;
+}
+.page .annotation-layer .textWidgetAnnotation input.comb:focus {
+  width: 115%;
+}
+.page .annotation-layer .choiceWidgetAnnotation select {
+  background-color: rgba(0, 54, 255, 0.13);
+  border: 1px solid transparent;
+  box-sizing: border-box;
+  font-size: 9px;
+  height: 100%;
+  margin: 0;
+  padding: 0 3px;
+  vertical-align: top;
+  width: 100%;
+}
+.page .annotation-layer .choiceWidgetAnnotation select option {
+  padding: 0;
+}
+.page .annotation-layer .choiceWidgetAnnotation select:hover {
+  border: 1px solid #000000;
+}
+.page .annotation-layer .choiceWidgetAnnotation select:focus {
+  background: none;
+  border: 1px solid transparent;
+}
+.page .annotation-layer .choiceWidgetAnnotation select[disabled] {
+  background: none;
+  border: 1px solid transparent;
+  cursor: not-allowed;
+}
+.page .annotation-layer .buttonWidgetAnnotation.checkBox input {
+  background-color: rgba(0, 54, 255, 0.13);
+  border: 1px solid transparent;
+  box-sizing: border-box;
+  font-size: 9px;
+  height: 100%;
+  margin: 0;
+  padding: 0 3px;
+  vertical-align: top;
+  width: 100%;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  padding: 0;
+}
+.page .annotation-layer .buttonWidgetAnnotation.checkBox input:hover {
+  border: 1px solid #000000;
+}
+.page .annotation-layer .buttonWidgetAnnotation.checkBox input:checked:before {
+  background-color: #000000;
+  content: "";
+  display: block;
+  position: absolute;
+  height: 80%;
+  left: 45%;
+  width: 1px;
+  transform: rotate(45deg);
+}
+.page .annotation-layer .buttonWidgetAnnotation.checkBox input:checked:after {
+  background-color: #000000;
+  content: "";
+  display: block;
+  position: absolute;
+  height: 80%;
+  left: 45%;
+  width: 1px;
+  transform: rotate(-45deg);
+}
+.page .annotation-layer .buttonWidgetAnnotation.checkBox input[disabled] {
+  background: none;
+  border: 1px solid transparent;
+  cursor: not-allowed;
+}
+.page .annotation-layer .buttonWidgetAnnotation.radioButton input {
+  background-color: rgba(0, 54, 255, 0.13);
+  border: 1px solid transparent;
+  box-sizing: border-box;
+  font-size: 9px;
+  height: 100%;
+  margin: 0;
+  padding: 0 3px;
+  vertical-align: top;
+  width: 100%;
+  border-radius: 50%;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  padding: 0;
+}
+.page .annotation-layer .buttonWidgetAnnotation.radioButton input:hover {
+  border: 1px solid #000000;
+}
+.page .annotation-layer .buttonWidgetAnnotation.radioButton input:checked:before {
+  background-color: #000000;
+  content: "";
+  display: block;
+  position: absolute;
+  border-radius: 50%;
+  height: 50%;
+  left: 30%;
+  top: 20%;
+  width: 50%;
+}
+.page .annotation-layer .buttonWidgetAnnotation.radioButton input[disabled] {
+  background: none;
+  border: 1px solid transparent;
+  cursor: not-allowed;
+}
+.page .annotation-layer .popupWrapper {
+  position: absolute;
+  width: 20em;
+}
+.page .annotation-layer .popup {
+  position: absolute;
+  z-index: 200;
+  max-width: 20em;
+  background-color: #ffff99;
+  box-shadow: 0 2px 5px #888888;
+  border-radius: 2px;
+  padding: 6px;
+  margin-left: 5px;
+  cursor: pointer;
+  font: message-box;
+  font-size: 9px;
+  white-space: normal;
+  word-wrap: break-word;
+}
+.page .annotation-layer .popup > * {
+  font-size: 9px;
+}
+.page .annotation-layer .popup h1 {
+  display: inline-block;
+}
+.page .annotation-layer .popup span {
+  display: inline-block;
+  margin-left: 5px;
+}
+.page .annotation-layer .popup p {
+  border-top: 1px solid #333333;
+  margin-top: 2px;
+  padding-top: 2px;
+}
+.page .annotation-layer .highlightAnnotation {
+  cursor: pointer;
+}
+.page .annotation-layer .underlineAnnotation {
+  cursor: pointer;
+}
+.page .annotation-layer .squigglyAnnotation {
+  cursor: pointer;
+}
+.page .annotation-layer .strikeoutAnnotation {
+  cursor: pointer;
+}
+.page .annotation-layer .freeTextAnnotation {
+  cursor: pointer;
+}
+.page .annotation-layer .lineAnnotation svg line {
+  cursor: pointer;
+}
+.page .annotation-layer .squareAnnotation svg rect {
+  cursor: pointer;
+}
+.page .annotation-layer .circleAnnotation svg ellipse {
+  cursor: pointer;
+}
+.page .annotation-layer .polylineAnnotation svg polyline {
+  cursor: pointer;
+}
+.page .annotation-layer .polygonAnnotation svg polygon {
+  cursor: pointer;
+}
+.page .annotation-layer .caretAnnotation {
+  cursor: pointer;
+}
+.page .annotation-layer .inkAnnotation svg polyline {
+  cursor: pointer;
+}
+.page .annotation-layer .stampAnnotation {
+  cursor: pointer;
+}
+.page .annotation-layer .fileAttachmentAnnotation {
+  cursor: pointer;
+}
+.page .xfaLayer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 200;
+  transform-origin: 0 0;
+}
+.page .xfaLayer * {
+  color: inherit;
+  font: inherit;
+  -webkit-font-kerning: inherit;
+  font-kerning: inherit;
+  letter-spacing: inherit;
+  text-align: inherit;
+  text-decoration: inherit;
+  vertical-align: inherit;
+  box-sizing: border-box;
+}
+.page .xfaFont {
+  color: black;
+  font-weight: normal;
+  -webkit-font-kerning: none;
+  font-kerning: none;
+  font-size: 10px;
+  font-style: normal;
+  letter-spacing: 0;
+  text-decoration: none;
+  vertical-align: 0;
+}
+.page .xfaDraw {
+  z-index: 200;
+}
+.page .xfaExclgroup {
+  z-index: 300;
+}
+.page .xfaField {
+  z-index: 300;
+}
+.page .xfaSubform {
+  z-index: 100;
+}
+.page .xfaLabel {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+}
+.page .xfaLabel > input[type="checkbox"] {
+  position: absolute;
+  left: -99999px;
+}
+.page .xfaLabel > input[type="checkbox"]:focus .xfaCheckboxMark {
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.7);
+}
+.page .xfaCaption {
+  flex: 1 1 auto;
+}
+.page .xfaTextfield {
+  width: 100%;
+  height: 100%;
+  flex: 1 1 auto;
+  border: none;
+}
+.page .xfaSelect {
+  width: 100%;
+  height: 100%;
+  flex: 1 1 auto;
+  border: none;
+}
+.page .xfaCheckboxMark {
+  cursor: pointer;
+  flex: 0 0 auto;
+  border-style: solid;
+  border-width: 2px;
+  border-color: #8f8f9d;
+  font-size: 10px;
+  line-height: 10px;
+  width: 10px;
+  height: 10px;
+  text-align: center;
+  vertical-align: middle;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+.page .xfaCheckbox:checked .xfaCheckboxMark::after {
+  content: attr(mark);
+}
+.page .xfaButton {
+  cursor: pointer;
+  width: 100%;
+  height: 100%;
+  border: none;
+  text-align: center;
+}
+.page .xfaButton:hover {
+  background: Highlight;
+}
+.page .xfaLrTb {
+  display: block;
+}
+.page .xfaLrTb > div {
+  display: inline;
+  float: left;
+}
+.page .xfaRlTb {
+  display: block;
+}
+.page .xfaRlTb > div {
+  display: inline;
+  float: right;
+}
+.page .xfaTb {
+  display: block;
+}
+.page .xfaPosition {
+  display: block;
+  position: relative;
+}
+.page .xfaValignMiddle {
+  display: flex;
+  align-items: center;
+}
+.page .xfaTable {
+  display: flex;
+  flex-direction: column;
+}
+.page .xfaTable .xfaRow {
+  display: flex;
+  flex-direction: row;
+  flex: 1 1 auto;
+}
+.page .xfaTable .xfaRow > div {
+  flex: 1 1 auto;
+}
+.page .xfaTable .xfaRlRow {
+  display: flex;
+  flex-direction: row-reverse;
+  flex: 1;
+}
+.page .xfaTable .xfaRlRow > div {
+  flex: 1;
+}
+.page .canvasWrapper {
+  overflow: hidden;
+}
+.page canvas {
+  margin: 0;
+  display: block;
+}
+.page canvas[hidden] {
+  display: none;
+}
+.page .loadingIcon {
+  position: absolute;
+  display: block;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  background: url("../assets/loading-icon.gif") center no-repeat;
+}
+.page .removePageBorders {
+  margin-left: 0;
+  margin-right: 0;
+}
+.page .removePageBorders .page {
+  margin: 0 auto 10px;
+  border: none;
+}
+.page .removePageBorders .spread .page {
+  margin-left: 5px;
+  margin-right: 5px;
+}
+.page .singlePageView {
+  display: inline-block;
+}
+.page .singlePageView .page {
+  margin: 0;
+  border: none;
+}
+.page .scrollHorizontal {
+  margin-left: 3.5px;
+  margin-right: 3.5px;
+  text-align: center;
+  white-space: nowrap;
+}
+.page .scrollHorizontal .spread {
+  margin-left: 0;
+  margin-right: 0;
+  display: inline-block;
+  vertical-align: middle;
+}
+.page .scrollHorizontal .page {
+  display: inline-block;
+  vertical-align: middle;
+  margin-left: -3.5px;
+  margin-right: -3.5px;
+}
+.page .scrollWrapped {
+  margin-left: 3.5px;
+  margin-right: 3.5px;
+  text-align: center;
+}
+.page .scrollWrapped .spread {
+  margin-left: 0;
+  margin-right: 0;
+  display: inline-block;
+  vertical-align: middle;
+}
+.page .scrollWrapped .page {
+  display: inline-block;
+  vertical-align: middle;
+  margin-left: -3.5px;
+  margin-right: -3.5px;
+}
+.page .spread {
+  margin-left: 3.5px;
+  margin-right: 3.5px;
+  text-align: center;
+  white-space: nowrap;
+}
+.page .spread .page {
+  display: inline-block;
+  vertical-align: middle;
+  margin-left: -3.5px;
+  margin-right: -3.5px;
+}
+.page .removePageBorders.scrollHorizontal .page {
+  margin-left: 5px;
+  margin-right: 5px;
+}
+.page .removePageBorders.scrollWrapped .page {
+  margin-left: 5px;
+  margin-right: 5px;
+}
