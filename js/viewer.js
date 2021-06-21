@@ -194,7 +194,29 @@ var PDFMiniViewers = ( function() {
     };
 
     var eventPrint = function() {
-
+        var mini = this.closest('.pdf-mini-viewer');
+        var pdf  = PDFS[ mini.id ];
+        // TODO: This will work to print BUT it will not save any form data yet!
+        // TODO: Implement updated to pdf.annotationStorage when form fields are filled out.
+        pdf.saveDocument( pdf.annotationStorage ).then(
+            // Success.
+            function( data ) {
+                // Get the PDF as a blob.
+                var getUrl = window.location;
+                var url = getUrl.protocol + "//" + getUrl.host + "/" + getUrl.pathname.split('/')[1];
+                var blob = new Blob( [data], { type: "application/pdf" } );
+                var url = URL.createObjectURL( blob );
+                // Open it in a new tab and let the browser render it for printing.
+                var a = document.createElement("A");
+                a.target = '_blank';
+                a.href = url;
+                a.click();
+            },
+            // Error.
+            function( e ) {
+                console.error( e );
+            }
+        );
     };
 
     var eventZoomCompress = function() {
@@ -433,11 +455,9 @@ var PDFMiniViewers = ( function() {
                 }
                 return [ elem, 'buttonWidgetAnnotation checkBox' ];
             case 'CH':
-                console.log(data);
                 var elem = document.createElement('SELECT');
                 elem.id = data.id;
                 elem.setAttribute( 'name', data.fieldName );
-                elem.setAttribute( 'value', data.fieldValue );
                 if ( data.multiSelect ) {
                     elem.setAttribute( 'multiple', '' );
                 }
@@ -607,6 +627,7 @@ var PDFMiniViewers = ( function() {
         var renderContext = {
             canvasContext: canvas.getContext('2d'),
             viewport: viewport,
+            renderInteractiveForms: true
         };
         PDFPageProxy.render( renderContext );
 
@@ -686,6 +707,7 @@ var PDFMiniViewers = ( function() {
         var renderContext = {
             canvasContext: newCanvas.getContext('2d'),
             viewport: viewport,
+            renderInteractiveForms: true
         };
         PDFPageProxy.render( renderContext );
 

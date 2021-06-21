@@ -83,6 +83,23 @@
         overflow: auto;
         padding: 15px 0;
         background-color: #525659;
+
+        .page {
+            section {
+                body, input, select, button {
+                    font-size: 90%;
+                    outline: none;
+                }
+                input[type="checkbox"], input[type="checkbox"]:checked {
+                    &:before {
+                        width: 1.5px;
+                    }
+                    &:after {
+                        width: 1.5px;
+                    }
+                }
+            }
+        }
     }
 
     .pdf-resize-toolbar {
