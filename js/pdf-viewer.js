@@ -490,8 +490,18 @@ var PDFMiniViewers = ( function() {
                 event.preventDefault();
                 var view = this.closest('.pdf-mini-viewer').querySelector('.pdf-viewer');
                 var pdf  = PDFS[ view.dataset.id ];
-                var link = event.srcElement.href.substr( event.srcElement.href.indexOf('#') + 1 );
-                link     = JSON.parse( decodeURIComponent( link ) );
+                var link = event.srcElement;
+
+                if ( link.target.toUpperCase() == '_BLANK' ) {
+                    // Create a temporary link otherwise we cause an infinite loop by clicking the link.
+                    var a = document.createElement('A');
+                    a.setAttribute( 'href', link.href );
+                    a.setAttribute( 'target', '_blank' );
+                    a.click();
+                    return;
+                }
+                link = link.href.substr( event.srcElement.href.indexOf('#') + 1 );
+                link = JSON.parse( decodeURIComponent( link ) );
                 pdf.getPageIndex( link[0] ).then( 
                     function( page ) {
                         // PDFJS counts pages from 0 so add 1.
@@ -927,6 +937,3 @@ var PDFMiniViewers = ( function() {
     };
 
 } )();
-
-// DEVELOPMENT ONLY!
-setTimeout( PDFMiniViewers.initialize.bind( null, 'js/pdf.worker.js', 'js/cmaps' ), 50 );
