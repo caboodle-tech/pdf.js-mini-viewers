@@ -111,6 +111,17 @@
   width: 1.15rem;
   height: 1.15rem;
   border-radius: 50%;
+  background-color: #dee5ff;
+}
+.pdf-mini-viewer .pdf-viewer .page section input[type="radio"]:checked:before {
+  content: '';
+  position: relative;
+  display: block;
+  top: 0;
+  left: 0;
+  width: 1.15rem;
+  height: 1.15rem;
+  border-radius: 50%;
   background-color: #ffffff;
 }
 .pdf-mini-viewer .pdf-viewer .page section input[type="radio"]:checked:after {

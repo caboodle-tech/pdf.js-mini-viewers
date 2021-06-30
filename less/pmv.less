@@ -116,10 +116,21 @@
                         width: 1.15rem;
                         height: 1.15rem;
                         border-radius: 50%;
-                        background-color: #ffffff;
+                        background-color: #dee5ff;
                     }
                 }
                 input[type="radio"]:checked {
+                    &:before {
+                        content: '';
+                        position: relative;
+                        display: block;
+                        top: 0;
+                        left: 0;
+                        width: 1.15rem;
+                        height: 1.15rem;
+                        border-radius: 50%;
+                        background-color: #ffffff;
+                    }
                     &:after {
                         content: '';
                         position: absolute;

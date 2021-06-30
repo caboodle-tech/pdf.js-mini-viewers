@@ -939,6 +939,3 @@ var PDFMiniViewers = ( function() {
     };
 
 } )();
-
-// DEVELOPMENT ONLY!
-setTimeout( PDFMiniViewers.initialize.bind( null, 'js/pdf.worker.js', 'js/cmaps' ), 50 );
