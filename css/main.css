@@ -77,10 +77,14 @@
 }
 .pdf-mini-viewer .pdf-viewer .page section body,
 .pdf-mini-viewer .pdf-viewer .page section input,
+.pdf-mini-viewer .pdf-viewer .page section textarea,
 .pdf-mini-viewer .pdf-viewer .page section select,
 .pdf-mini-viewer .pdf-viewer .page section button {
   font-size: 90%;
   outline: none;
+}
+.pdf-mini-viewer .pdf-viewer .page section textarea {
+  padding: 5px;
 }
 .pdf-mini-viewer .pdf-viewer .page section input[type="checkbox"]:before,
 .pdf-mini-viewer .pdf-viewer .page section input[type="checkbox"]:checked:before {
@@ -89,6 +93,47 @@
 .pdf-mini-viewer .pdf-viewer .page section input[type="checkbox"]:after,
 .pdf-mini-viewer .pdf-viewer .page section input[type="checkbox"]:checked:after {
   width: 1.5px;
+}
+.pdf-mini-viewer .pdf-viewer .page section input[type="radio"],
+.pdf-mini-viewer .pdf-viewer .page section input[type="radio"]:checked {
+  border: 1px solid #000000;
+  width: 1.15rem;
+  height: 1.15rem;
+  overflow: hidden;
+}
+.pdf-mini-viewer .pdf-viewer .page section input[type="radio"]:before,
+.pdf-mini-viewer .pdf-viewer .page section input[type="radio"]:checked:before {
+  content: '';
+  position: relative;
+  display: block;
+  top: 0;
+  left: 0;
+  width: 1.15rem;
+  height: 1.15rem;
+  border-radius: 50%;
+  background-color: #dee5ff;
+}
+.pdf-mini-viewer .pdf-viewer .page section input[type="radio"]:checked:before {
+  content: '';
+  position: relative;
+  display: block;
+  top: 0;
+  left: 0;
+  width: 1.15rem;
+  height: 1.15rem;
+  border-radius: 50%;
+  background-color: #ffffff;
+}
+.pdf-mini-viewer .pdf-viewer .page section input[type="radio"]:checked:after {
+  content: '';
+  position: absolute;
+  display: block;
+  top: 0.2rem;
+  left: 0.2rem;
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 50%;
+  background-color: #000000;
 }
 .pdf-mini-viewer .pdf-resize-toolbar {
   display: flex;

@@ -446,14 +446,21 @@ var PDFMiniViewers = ( function() {
         switch( data.fieldType.toUpperCase() ) {
             case 'BTN':
                 var elem = document.createElement('INPUT');
+                var type;
                 elem.id = data.id;
-                elem.setAttribute( 'type', 'checkbox' );
+                if ( data.checkBox ) {
+                    elem.setAttribute( 'type', 'checkbox' );
+                    type = 'checkBox';
+                } else {
+                    elem.setAttribute( 'type', 'radio' );
+                    type = 'radioButton';
+                }
                 elem.setAttribute( 'name', data.fieldName );
                 if ( data.exportValue == data.fieldValue ) {
                     elem.checked = true;
                     elem.setAttribute( 'value', data.exportValue );
                 }
-                return [ elem, 'buttonWidgetAnnotation checkBox' ];
+                return [ elem, 'buttonWidgetAnnotation ' + type ];
             case 'CH':
                 var elem = document.createElement('SELECT');
                 elem.id = data.id;
@@ -472,7 +479,12 @@ var PDFMiniViewers = ( function() {
                 elem.innerHTML = options;
                 return [ elem, 'choiceWidgetAnnotation' ];
             case 'TX':
-                var elem = document.createElement('INPUT');
+                var elem;
+                if ( data.multiLine ) {
+                    elem = document.createElement('TEXTAREA');
+                } else {
+                    elem = document.createElement('INPUT');
+                }
                 elem.id = data.id;
                 elem.setAttribute( 'type', 'text' );
                 elem.setAttribute( 'name', data.fieldName );
