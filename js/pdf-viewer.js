@@ -121,12 +121,39 @@ var PDFMiniViewers = ( function() {
     };
 
     var eventDownload = function() {
-        var viewer = this.closest('.pdf-mini-viewer').querySelector('.pdf-viewer');
-        var a = document.createElement('A');
-        a.setAttribute( 'href', viewer.dataset.pdf );
-        a.setAttribute( 'target', '_blank' );
-        a.setAttribute( 'download', '' );
-        a.click();
+        var mini = this.closest('.pdf-mini-viewer');
+        var pdf  = PDFS[ mini.id ];
+        var name = getFilename( mini );
+        pdf.saveDocument( pdf.annotationStorage ).then(
+            // Success.
+            function( data ) {
+                // Get the PDF as a blob.
+                var getUrl = window.location;
+                var url = getUrl.protocol + "//" + getUrl.host + "/" + getUrl.pathname.split('/')[1];
+                var blob = new Blob( [data], { type: "application/pdf" } );
+                var url = URL.createObjectURL( blob );
+                // Open it in a new tab and let the browser render it for printing.
+                var a = document.createElement("A");
+                a.setAttribute( 'href', url );
+                a.setAttribute( 'target', '_blank' );
+                a.setAttribute( 'download', name );
+                console.log( a );
+                a.click();
+            },
+            // Error.
+            function( e ) {
+                console.error( e );
+            }
+        );
+    };
+
+    var getFilename = function( mini ) {
+        var viewer   = mini.querySelector('.pdf-viewer');
+        var filename = viewer.dataset.pdf;
+        if ( filename.indexOf('/') > -1 ) {
+            filename = filename.substr( filename.lastIndexOf('/') + 1 );
+        }
+        return filename;
     };
 
     var eventPageChange = function() {
@@ -196,8 +223,6 @@ var PDFMiniViewers = ( function() {
     var eventPrint = function() {
         var mini = this.closest('.pdf-mini-viewer');
         var pdf  = PDFS[ mini.id ];
-        // TODO: This will work to print BUT it will not save any form data yet!
-        // TODO: Implement updated to pdf.annotationStorage when form fields are filled out.
         pdf.saveDocument( pdf.annotationStorage ).then(
             // Success.
             function( data ) {
@@ -301,7 +326,7 @@ var PDFMiniViewers = ( function() {
         }
     };
 
-    var getAnnotationHTML = function( data, viewport ) {
+    var getAnnotationHTML = function( pdf, data, viewport ) {
         switch( data.subtype.toUpperCase() ) {
             case 'LINK':
                 var a = document.createElement('A');
@@ -316,7 +341,7 @@ var PDFMiniViewers = ( function() {
                 a.setAttribute( 'href', href );
                 return [ a, 'link-annotation' ];
             case 'WIDGET':
-                return getWidgetHTML( data, viewport );
+                return getWidgetHTML( pdf, data, viewport );
             default:
                 console.warn('Unsupported annotation type. Support might be added from: https://github.com/mozilla/pdf.js/blob/2a7827a7c67375a239284f9d37986a2941e51dba/test/unit/annotation_spec.js');
                 return [ document.createElement('SPAN'), '' ];
@@ -442,7 +467,7 @@ var PDFMiniViewers = ( function() {
         return hash;
     };
 
-    var getWidgetHTML = function( data, viewport ) {
+    var getWidgetHTML = function( pdf, data, viewport ) {
         var type = '';
         switch( data.fieldType.toUpperCase() ) {
             case 'BTN':
@@ -480,6 +505,8 @@ var PDFMiniViewers = ( function() {
                 return [ elem, 'choiceWidgetAnnotation' ];
             case 'TX':
                 var elem;
+                console.log( pdf.annotationStorage.getValue( data.id ) ); // TODO: Complete this.
+                // var value = pdf.annotationStorage.getValue() data.fieldValue;
                 if ( data.multiLine ) {
                     elem = document.createElement('TEXTAREA');
                 } else {
@@ -493,7 +520,7 @@ var PDFMiniViewers = ( function() {
                 elem.id = data.id;
                 elem.setAttribute( 'maxlength', data.maxLen );
                 elem.setAttribute( 'name', data.fieldName );
-                elem.setAttribute( 'value', data.fieldValue );
+                // elem.setAttribute( 'value', data.fieldValue );
                 elem.addEventListener( 'input', updateAnnotationStorage );
                 return [ elem, 'textWidgetAnnotation' ];
             default:
@@ -513,7 +540,8 @@ var PDFMiniViewers = ( function() {
     var getComboStyle = function( data, viewport ) {
         var width = ( data.rect[2] - data.rect[0] ) * viewport.scale;
         var spacing = width / data.maxLen;
-        return 'letter-spacing: calc(' + spacing + 'px - 1ch);';
+        var color = 'rgb(' + data.color.join(',') + ')';
+        return 'letter-spacing: calc(' + spacing + 'px - 1ch); color: ' + color + ';';
     };
 
     //==============================
@@ -611,6 +639,8 @@ var PDFMiniViewers = ( function() {
 
     var loadPage = function( viewer, PDFPageProxy ) {
 
+        var pdf = PDFS[ viewer.dataset.id ];
+
         // Start in desktop mode using an approximation of actual size as the scale.
         var scale = 1.5;
         var mode  = 'page-actual';
@@ -683,7 +713,7 @@ var PDFMiniViewers = ( function() {
         );
 
         PDFPageProxy.getAnnotations().then(
-            renderAnnotationLayer.bind( null, annotationLayer, viewport, PDFPageProxy.pageNumber ),
+            renderAnnotationLayer.bind( null, pdf, annotationLayer, viewport ),
             function( error ) {
                 console.error( error );
             }
@@ -691,6 +721,8 @@ var PDFMiniViewers = ( function() {
     };
 
     var reloadPage = function( viewer, PDFPageProxy ) {
+
+        var pdf = PDFS[ viewer.dataset.id ];
 
         // Start in desktop mode using an approximation of actual size as the scale.
         var scale = 1.5;
@@ -763,14 +795,14 @@ var PDFMiniViewers = ( function() {
         );
 
         PDFPageProxy.getAnnotations().then(
-            renderAnnotationLayer.bind( null, annotationLayer, viewport, PDFPageProxy.pageNumber ),
+            renderAnnotationLayer.bind( null, pdf, annotationLayer, viewport ),
             function( error ) {
                 console.error( error );
             }
         );
     };
 
-    var renderAnnotationLayer = function( annotationLayer, viewport, page, annotationsData ) {
+    var renderAnnotationLayer = function( pdf, annotationLayer, viewport, annotationsData ) {
         var previousDest = '';
         var previousLeft = 0;
         var currentHash  = '';
@@ -793,7 +825,7 @@ var PDFMiniViewers = ( function() {
                 }
             }
 
-            var html = getAnnotationHTML( data, viewport );
+            var html = getAnnotationHTML( pdf, data, viewport );
 
             if ( ! html[1] ) {
                 html[1] = 'link-annotation';
