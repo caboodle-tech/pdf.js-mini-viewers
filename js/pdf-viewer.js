@@ -301,7 +301,7 @@ var PDFMiniViewers = ( function() {
         }
     };
 
-    var getAnnotationHTML = function( data ) {
+    var getAnnotationHTML = function( data, viewport ) {
         switch( data.subtype.toUpperCase() ) {
             case 'LINK':
                 var a = document.createElement('A');
@@ -316,7 +316,7 @@ var PDFMiniViewers = ( function() {
                 a.setAttribute( 'href', href );
                 return [ a, 'link-annotation' ];
             case 'WIDGET':
-                return getWidgetHTML( data );
+                return getWidgetHTML( data, viewport );
             default:
                 console.warn('Unsupported annotation type. Support might be added from: https://github.com/mozilla/pdf.js/blob/2a7827a7c67375a239284f9d37986a2941e51dba/test/unit/annotation_spec.js');
                 return [ document.createElement('SPAN'), '' ];
@@ -442,25 +442,25 @@ var PDFMiniViewers = ( function() {
         return hash;
     };
 
-    var getWidgetHTML = function( data ) {
+    var getWidgetHTML = function( data, viewport ) {
+        var type = '';
         switch( data.fieldType.toUpperCase() ) {
             case 'BTN':
                 var elem = document.createElement('INPUT');
-                var type;
                 elem.id = data.id;
                 if ( data.checkBox ) {
-                    elem.setAttribute( 'type', 'checkbox' );
-                    type = 'checkBox';
+                    elem.setAttribute( 'type', ' checkbox' );
+                    type = ' checkBox';
                 } else {
-                    elem.setAttribute( 'type', 'radio' );
-                    type = 'radioButton';
+                    elem.setAttribute( 'type', ' radio' );
+                    type = ' radioButton';
                 }
                 elem.setAttribute( 'name', data.fieldName );
                 if ( data.exportValue == data.fieldValue ) {
                     elem.checked = true;
                     elem.setAttribute( 'value', data.exportValue );
                 }
-                return [ elem, 'buttonWidgetAnnotation ' + type ];
+                return [ elem, 'buttonWidgetAnnotation' + type ];
             case 'CH':
                 var elem = document.createElement('SELECT');
                 elem.id = data.id;
@@ -484,9 +484,14 @@ var PDFMiniViewers = ( function() {
                     elem = document.createElement('TEXTAREA');
                 } else {
                     elem = document.createElement('INPUT');
+                    elem.setAttribute( 'type', 'text' );
+                    if ( data.comb ) {
+                        elem.classList.add('comb');
+                        elem.setAttribute( 'style', getComboStyle( data, viewport ) );
+                    }
                 }
                 elem.id = data.id;
-                elem.setAttribute( 'type', 'text' );
+                elem.setAttribute( 'maxlength', data.maxLen );
                 elem.setAttribute( 'name', data.fieldName );
                 elem.setAttribute( 'value', data.fieldValue );
                 return [ elem, 'textWidgetAnnotation' ];
@@ -494,6 +499,12 @@ var PDFMiniViewers = ( function() {
                 console.warn('Unsupported widget type. Support might be added from: https://github.com/mozilla/pdf.js/blob/2a7827a7c67375a239284f9d37986a2941e51dba/test/unit/annotation_spec.js');
                 return [ document.createElement('SPAN'), '' ];
         }
+    };
+
+    var getComboStyle = function( data, viewport ) {
+        var width = ( data.rect[2] - data.rect[0] ) * viewport.scale;
+        var spacing = width / data.maxLen;
+        return 'letter-spacing: calc(' + spacing + 'px - 1ch);';
     };
 
     var goToBookmark = function() {
@@ -771,7 +782,7 @@ var PDFMiniViewers = ( function() {
                 }
             }
 
-            var html = getAnnotationHTML( data );
+            var html = getAnnotationHTML( data, viewport );
 
             if ( ! html[1] ) {
                 html[1] = 'link-annotation';
