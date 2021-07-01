@@ -494,6 +494,7 @@ var PDFMiniViewers = ( function() {
                 elem.setAttribute( 'maxlength', data.maxLen );
                 elem.setAttribute( 'name', data.fieldName );
                 elem.setAttribute( 'value', data.fieldValue );
+                elem.addEventListener( 'input', updateAnnotationStorage );
                 return [ elem, 'textWidgetAnnotation' ];
             default:
                 console.warn('Unsupported widget type. Support might be added from: https://github.com/mozilla/pdf.js/blob/2a7827a7c67375a239284f9d37986a2941e51dba/test/unit/annotation_spec.js');
@@ -501,11 +502,21 @@ var PDFMiniViewers = ( function() {
         }
     };
 
+    // ========================== TODO
+
+    var updateAnnotationStorage = function() {
+        var viewer = this.closest('.pdf-viewer');
+        var pdf = PDFS[ viewer.dataset.id ];
+        pdf.annotationStorage.setValue( this.id, { value: this.value } );
+    };
+
     var getComboStyle = function( data, viewport ) {
         var width = ( data.rect[2] - data.rect[0] ) * viewport.scale;
         var spacing = width / data.maxLen;
         return 'letter-spacing: calc(' + spacing + 'px - 1ch);';
     };
+
+    //==============================
 
     var goToBookmark = function() {
         if ( event.srcElement ) {
