@@ -11,11 +11,11 @@
         align-items: center;
         height: 50px;
         line-height: 0;
-        background-color: #323639;
-        color: #f1f1f1;
+        background-color: @toolbar-bg;
+        color: @toolbar-icon;
 
         .pdf-icon, svg.pdf-icon {
-            fill: #f1f1f1;
+            fill: @toolbar-icon;
 
             &:hover {
                 cursor: pointer;
@@ -46,11 +46,11 @@
                 width: 40px;
                 padding: 3px 5px;
                 border-radius: 2px;
-                border: 1px solid lighten( #525659, 15% );
-                background-color: #525659;
+                border: 1px solid lighten( @viewer-bg, 15% );
+                background-color: @viewer-bg;
                 font-family: monospace;
                 font-size: 15px;
-                color: #f1f1f1;
+                color: @toolbar-icon;
 
                 &::-webkit-outer-spin-button,
                 &::-webkit-inner-spin-button {
@@ -77,72 +77,118 @@
             margin-right: 15px;
             cursor: pointer;
         }
+
+        &.single-page {
+            .page-up, .page-down, .page-wrapper {
+                pointer-events: none;
+                opacity: 0;
+            }
+        }
+
+        &.no-page-up {
+            .page-up {
+                pointer-events: none;
+                opacity: .5;
+                cursor: not-allowed;
+            }
+        }
+
+        &.no-page-down {
+            .page-down {
+                pointer-events: none;
+                opacity: .5;
+                cursor: not-allowed;
+            }
+        }
     }
 
     .pdf-viewer {
         overflow: auto;
         padding: 15px 0;
-        background-color: #525659;
+        background-color: @viewer-bg;
 
         .page {
-            section {
-                body, input, textarea, select, button {
-                    font-size: 90%;
-                    outline: none;
-                }
-                textarea {
-                    padding: 5px;
-                }
-                input[type="checkbox"], input[type="checkbox"]:checked {
-                    &:before {
-                        width: 1.5px;
-                    }
-                    &:after {
-                        width: 1.5px;
-                    }
-                }
-                input[type="radio"], input[type="radio"]:checked {
-                   border: 1px solid #000000;
-                   width: 1.15rem;
-                   height: 1.15rem;
-                   overflow: hidden;
+            position: relative;
+            margin: 15px auto;
+            direction: ltr;
+            width: 816px;
+            height: 1056px;
+            overflow: visible;
+            background-color: @page-bg;
+            -webkit-box-shadow: 0px 1px 3px 3px rgba(0, 0, 0, 0.2);
+            box-shadow: 0px 1px 3px 3px rgba(0, 0, 0, 0.2);
 
-                    &:before {
-                        content: '';
-                        position: relative;
-                        display: block;
-                        top: 0;
-                        left: 0;
-                        width: 1.15rem;
-                        height: 1.15rem;
-                        border-radius: 50%;
-                        background-color: #dee5ff;
+            @import "pdfjs.less";
+
+            .annotation-layer {
+
+                section {
+
+                    body, input, textarea, select, button {
+                        outline: none;
+                    }
+
+                    input[type="button"] {
+                        width: 100%;
+                        height: 100%;
+                        cursor: pointer;
+                    }
+
+                    &.buttonWidgetAnnotation {
+                        &.checkBox {
+                            input {
+                                border: 1px solid @viewer-bg;
+                            }
+                        }
+                        &.radioButton {
+                            input {
+                                border: 1px solid @viewer-bg;
+                            }
+                            input[type="radio"]:checked {
+                                &:before {
+                                    top: 25%;
+                                    left: 25%;
+                                }
+                            }
+                        }
+                        &.checkBox, &.radioButton {
+                            input {
+                                &:disabled {
+                                    border: 1px solid @viewer-bg;
+                                    background-color: @disabled-bg;
+                                    cursor: not-allowed;
+                                }
+                            }
+                        }
+                    }
+
+                    &.choiceWidgetAnnotation {
+                        select {
+                            border: 1px solid @viewer-bg;
+
+                            &:disabled {
+                                background-color: @disabled-bg;
+                                cursor: not-allowed;
+                            }
+                        }
+                    }
+
+                    &.textWidgetAnnotation {
+                        input, textarea {
+                            padding: 5px;
+                            border: 1px solid @viewer-bg;
+
+                            &:disabled {
+                                border: 1px solid @viewer-bg;
+                                background-color: @disabled-bg;
+                                cursor: not-allowed;
+                            }
+                        }
+                        .comb {
+                            padding-left: 5px;
+                        }
                     }
                 }
-                input[type="radio"]:checked {
-                    &:before {
-                        content: '';
-                        position: relative;
-                        display: block;
-                        top: 0;
-                        left: 0;
-                        width: 1.15rem;
-                        height: 1.15rem;
-                        border-radius: 50%;
-                        background-color: #ffffff;
-                    }
-                    &:after {
-                        content: '';
-                        position: absolute;
-                        display: block;
-                        top: .20rem;
-                        left: .20rem;
-                        width: .70rem;
-                        height: .70rem;
-                        border-radius: 50%;
-                        background-color: #000000;
-                    }
-                 }
             }
         }
     }
@@ -153,11 +199,11 @@
         align-items: center;
         height: 50px;
         line-height: 0;
-        background-color: #323639;
+        background-color: @toolbar-bg;
 
         .pdf-icon, svg.pdf-icon {
-            fill: #f1f1f1;
-            color: #f1f1f1;
+            fill: @toolbar-icon;
+            color: @toolbar-icon;
 
             &:hover {
                 cursor: pointer;
@@ -197,7 +243,7 @@
         z-index: 100;
         width: 300px;
         overflow-y: auto;
-        background-color: #323639;
+        background-color: @toolbar-bg;
         padding: 15px;
         font-size: 15px;
         transition: right 0.55s linear;
@@ -206,7 +252,7 @@
             list-style-type: none;
             margin: 0;
             padding: 0;
-            color: #f1f1f1;
+            color: @toolbar-icon;
 
             li {
                 display: grid;
@@ -245,12 +291,12 @@
             a, .heading {
                 text-decoration: none;
                 border-radius: 5px;
-                color: #f1f1f1;
+                color: @toolbar-icon;
                 grid-area: link;
                 padding: 5px 3px;
 
                 &:hover {
-                    background-color: #525659;
+                    background-color: @viewer-bg;
                 }
             }
 
@@ -260,7 +306,7 @@
                 grid-area: toggle;
 
                 .pdf-icon, svg.pdf-icon {
-                    fill: #f1f1f1;
+                    fill: @toolbar-icon;
                     width: 14px;
                     height: 14px;
         
@@ -300,7 +346,7 @@
                 justify-content: center;
                 align-items: center;
                 cursor: pointer;
-                background-color: #f2f2f2;
+                background-color: @toolbar-icon;
                 border-radius: 50%;
                 width: 35px;
                 height: 35px;
@@ -310,8 +356,8 @@
                 .drop-shadow();
 
                 .pdf-icon, svg.pdf-icon {
-                    fill: #525659;
-                    color: #525659;
+                    fill: @viewer-bg;
+                    color: @viewer-bg;
                     width: 16px;
                     height: 16px;
                 }
@@ -368,7 +414,7 @@
                 display: flex;
                 justify-content: center;
                 align-items: center;
-                background-color: #f2f2f2;
+                background-color: @toolbar-icon;
                 border-radius: 50%;
                 width: 35px;
                 height: 35px;
@@ -378,8 +424,8 @@
                 .drop-shadow();
 
                 .pdf-icon, svg.pdf-icon {
-                    fill: #525659;
-                    color: #525659;
+                    fill: @viewer-bg;
+                    color: @viewer-bg;
                     width: 16px;
                     height: 16px;
                 }
