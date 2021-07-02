@@ -311,7 +311,8 @@ var PDFMiniViewers = ( function() {
     // For small PDFs this math is overkill but larger ones need the accuracy.
     var updateCurrentPage = function( e ) {
         var view = e.srcElement;
-        if ( ! view.dataset.scrollLock ) {
+        // Make sure to only respond to scrolls on the viewer and not scroll elements in the PDF.
+        if ( ! view.dataset.scrollLock && view.classList.contains('pdf-viewer') ) {
             // 0 = Viewer top and bottom padding combined.
             // 1 = Page height.
             // 2 = Page bottom margin.
@@ -346,6 +347,22 @@ var PDFMiniViewers = ( function() {
                 console.warn('Unsupported annotation type. Support might be added from: https://github.com/mozilla/pdf.js/blob/2a7827a7c67375a239284f9d37986a2941e51dba/test/unit/annotation_spec.js');
                 return [ document.createElement('SPAN'), '' ];
         }
+    };
+
+    /**
+     * Build the inline style string for PDF form combo inputs; these are
+     * inputs broken up into boxes where each box should hold only one
+     * character or group of characters.
+     *
+     * @param {Object} data The individual annotation object.
+     * @param {Object} viewport The current viewport object for the viewer this annotation belongs to.
+     * @return {string} The inline style string for this form element.
+     */
+    var getComboStyle = function( data, viewport ) {
+        var width   = ( data.rect[2] - data.rect[0] ) * viewport.scale;
+        var spacing = width / data.maxLen;
+        var color   = 'rgb(' + data.color.join(',') + ')';
+        return 'letter-spacing: calc(' + spacing + 'px - 1ch); color: ' + color + ';';
     };
 
     var getMainToolbarHTML = function( total ) {
@@ -468,30 +485,42 @@ var PDFMiniViewers = ( function() {
     };
 
     var getWidgetHTML = function( pdf, data, viewport ) {
-        var type = '';
+        // console.log( pdf.annotationStorage.getValue( data.id ) );
+        console.log( data );
+        var elem, type = '', value = '';
         switch( data.fieldType.toUpperCase() ) {
+            // Button, Checkbox, and Radio.
             case 'BTN':
-                var elem = document.createElement('INPUT');
+                elem = document.createElement('INPUT');
                 elem.id = data.id;
-                if ( data.checkBox ) {
-                    elem.setAttribute( 'type', ' checkbox' );
-                    type = ' checkBox';
+                if ( data.pushButton ) {
+                    elem.setAttribute( 'type', 'button' );
+                    if ( data.alternativeText ) {
+                        elem.setAttribute( 'value', data.alternativeText );
+                    } else {
+                        elem.setAttribute( 'value', data.fieldName );
+                    }
                 } else {
-                    elem.setAttribute( 'type', ' radio' );
-                    type = ' radioButton';
+                    if ( data.checkBox ) {
+                        elem.setAttribute( 'type', 'checkbox' );
+                        type = 'buttonWidgetAnnotation checkBox';
+                    } else {
+                        elem.setAttribute( 'type', 'radio' );
+                        type = 'buttonWidgetAnnotation radioButton';
+                    }
+                    if ( data.exportValue == data.fieldValue ) {
+                        elem.checked = true;
+                        elem.setAttribute( 'value', data.exportValue );
+                    }
+                    elem.addEventListener( 'change', updateAnnotationStorage );
                 }
-                elem.setAttribute( 'name', data.fieldName );
-                if ( data.exportValue == data.fieldValue ) {
-                    elem.checked = true;
-                    elem.setAttribute( 'value', data.exportValue );
-                }
-                return [ elem, 'buttonWidgetAnnotation' + type ];
+                break;
+            // Select and Multi-select.
             case 'CH':
-                var elem = document.createElement('SELECT');
+                elem = document.createElement('SELECT');
                 elem.id = data.id;
-                elem.setAttribute( 'name', data.fieldName );
                 if ( data.multiSelect ) {
-                    elem.setAttribute( 'multiple', '' );
+                    elem.setAttribute( 'multiple', 'multiple' );
                 }
                 var options = '';
                 for( var i = 0; i < data.options.length; i++ ) {
@@ -502,10 +531,12 @@ var PDFMiniViewers = ( function() {
                     options += '>' + data.options[i].displayValue + '</option>';
                 }
                 elem.innerHTML = options;
-                return [ elem, 'choiceWidgetAnnotation' ];
+                elem.addEventListener( 'change', updateAnnotationStorage );
+                type = 'choiceWidgetAnnotation';
+                break;
+            // Input and Textarea.
             case 'TX':
-                var elem;
-                console.log( pdf.annotationStorage.getValue( data.id ) ); // TODO: Complete this.
+                // console.log( pdf.annotationStorage.getValue( data.id ) ); // TODO: Complete this.
                 // var value = pdf.annotationStorage.getValue() data.fieldValue;
                 if ( data.multiLine ) {
                     elem = document.createElement('TEXTAREA');
@@ -519,32 +550,28 @@ var PDFMiniViewers = ( function() {
                 }
                 elem.id = data.id;
                 elem.setAttribute( 'maxlength', data.maxLen );
-                elem.setAttribute( 'name', data.fieldName );
+                elem.setAttribute( 'value', data.fieldValue );
                 // elem.setAttribute( 'value', data.fieldValue );
                 elem.addEventListener( 'input', updateAnnotationStorage );
-                return [ elem, 'textWidgetAnnotation' ];
+                type = 'textWidgetAnnotation';
+                break;
             default:
+                elem = document.createElement('SPAN');
                 console.warn('Unsupported widget type. Support might be added from: https://github.com/mozilla/pdf.js/blob/2a7827a7c67375a239284f9d37986a2941e51dba/test/unit/annotation_spec.js');
-                return [ document.createElement('SPAN'), '' ];
         }
+        if ( data.readOnly ) {
+            elem.setAttribute( 'disabled', '' );
+        }
+        if ( data.alternativeText ) {
+            elem.setAttribute( 'title', data.alternativeText );
+            elem.setAttribute( 'alt', data.alternativeText );
+        } else {
+            elem.setAttribute( 'title', data.fieldName );
+            elem.setAttribute( 'alt', data.fieldName );
+        }
+        elem.setAttribute( 'name', data.fieldName );
+        return [ elem, type ];
     };
-
-    // ========================== TODO
-
-    var updateAnnotationStorage = function() {
-        var viewer = this.closest('.pdf-viewer');
-        var pdf = PDFS[ viewer.dataset.id ];
-        pdf.annotationStorage.setValue( this.id, { value: this.value } );
-    };
-
-    var getComboStyle = function( data, viewport ) {
-        var width = ( data.rect[2] - data.rect[0] ) * viewport.scale;
-        var spacing = width / data.maxLen;
-        var color = 'rgb(' + data.color.join(',') + ')';
-        return 'letter-spacing: calc(' + spacing + 'px - 1ch); color: ' + color + ';';
-    };
-
-    //==============================
 
     var goToBookmark = function() {
         if ( event.srcElement ) {
@@ -996,6 +1023,75 @@ var PDFMiniViewers = ( function() {
      */
     var uid = function() {
         return ( Date.now().toString(36) + Math.random().toString(36).substr(2, 6) ).toUpperCase();
+    };
+
+    /**
+     * Saves any changes to form elements in a PDF form to PDFJS's annotation storage.
+     * We can use this to refill the form after resize events.
+     * 
+     * TODO: In the future we can modify the whole storage process to save forms
+     * between page reloads using local storage.
+     */
+    var updateAnnotationStorage = function() {
+        var viewer = this.closest('.pdf-viewer');
+        var pdf    = PDFS[ viewer.dataset.id ];
+        var save   = '';
+        // Save the data differently depending on the element type.
+        switch( this.type.toUpperCase() ) {
+            case 'CHECKBOX':
+                save = true;
+                break;
+            case 'RADIO':
+                // Save selected radio, uncheck all other radios in group, and update DOM to match.
+                var current = this.id;
+                var options = this.closest('.page');
+                options     = options.querySelectorAll('input[type="radio"][name="' + this.name + '"]');
+                options.forEach( function( op ) {
+                    if ( op.id == current ) {
+                        save = true;
+                        op.checked = true;
+                    } else {
+                        save = false;
+                        op.checked = false;
+                    }
+                    pdf.annotationStorage.setValue( op.id, { 'value': save } );
+                } );
+                return;
+            case 'SELECT-ONE':
+                save = this.value;
+                break;
+            case 'SELECT-MULTIPLE':
+                // Find and save all selected options and deselect other options in the DOM.
+                save = [];
+                var options = this.options;
+                for ( var i = 0; i < options.length; i++ ) {
+                    if ( options[i].selected ) {
+                        options[i].setAttribute( 'selected', 'true' );
+                        save.push( options[i].innerHTML );
+                    } else {
+                        options[i].removeAttribute('selected');
+                    }
+                }
+                // NOTE: Multi-select is not supported by PDFJS yet: https://github.com/mozilla/pdf.js/blob/d80651e5724686535ac4fbdfac5d5e280a16dbdb/src/display/annotation_layer.js#L1121
+                // #12189 and #12224
+                break;
+            case 'INPUT':
+                if ( this.classList.contains('comb') ) {
+                    pdf.annotationStorage.setValue( this.id, {
+                        'value': this.value,
+                        'formmattedValue': this.value
+                    } );
+                    return;
+                }
+                save = this.value;
+                break;
+            case 'TEXTAREA':
+                // Use the input or textarea value directly.
+                save = this.value;
+                break;
+        }
+        // Save to PDFJS's annotation storage.
+        pdf.annotationStorage.setValue( this.id, { 'value': save } );
     };
 
     return {
