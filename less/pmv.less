@@ -85,64 +85,74 @@
         background-color: #525659;
 
         .page {
-            section {
-                body, input, textarea, select, button {
-                    font-size: 90%;
-                    outline: none;
-                }
-                textarea {
-                    padding: 5px;
-                }
-                input[type="checkbox"], input[type="checkbox"]:checked {
-                    &:before {
-                        width: 1.5px;
-                    }
-                    &:after {
-                        width: 1.5px;
-                    }
-                }
-                input[type="radio"], input[type="radio"]:checked {
-                   border: 1px solid #000000;
-                   width: 1.15rem;
-                   height: 1.15rem;
-                   overflow: hidden;
+            position: relative;
+            margin: 15px auto;
+            direction: ltr;
+            width: 816px;
+            height: 1056px;
+            overflow: visible;
+            background-color: #ffffff;
+            -webkit-box-shadow: 0px 1px 3px 3px rgba(0, 0, 0, 0.2);
+            box-shadow: 0px 1px 3px 3px rgba(0, 0, 0, 0.2);
 
-                    &:before {
-                        content: '';
-                        position: relative;
-                        display: block;
-                        top: 0;
-                        left: 0;
-                        width: 1.15rem;
-                        height: 1.15rem;
-                        border-radius: 50%;
-                        background-color: #dee5ff;
+            @import "pdfjs.less";
+
+            .annotation-layer {
+
+                section {
+
+                    body, input, textarea, select, button {
+                        outline: none;
+                    }
+                    
+                    input[type="button"] {
+                        width: 100%;
+                        height: 100%;
+                        cursor: pointer;
+                    }
+
+                    &.buttonWidgetAnnotation {
+                        &.radioButton {
+                            input[type="radio"]:checked {
+                                &:before {
+                                    top: 25%;
+                                    left: 25%;
+                                }
+                            }
+                        }
+                        &.checkBox, &.radioButton {
+                            input {
+                                &:disabled {
+                                    background-color: grey;
+                                    cursor: not-allowed;
+                                }
+                            }
+                        }
+                    }
+
+                    &.choiceWidgetAnnotation {
+                        select {
+                            &:disabled {
+                                background-color: grey;
+                                cursor: not-allowed;
+                            }
+                        }
+                    }
+
+                    &.textWidgetAnnotation {
+                        input, textarea {
+                            padding: 5px;
+
+                            &:disabled {
+                                background-color: grey;
+                                cursor: not-allowed;
+                            }
+                        }
+                        .comb {
+                            padding-left: 5px;
+                        }
                     }
                 }
-                input[type="radio"]:checked {
-                    &:before {
-                        content: '';
-                        position: relative;
-                        display: block;
-                        top: 0;
-                        left: 0;
-                        width: 1.15rem;
-                        height: 1.15rem;
-                        border-radius: 50%;
-                        background-color: #ffffff;
-                    }
-                    &:after {
-                        content: '';
-                        position: absolute;
-                        display: block;
-                        top: .20rem;
-                        left: .20rem;
-                        width: .70rem;
-                        height: .70rem;
-                        border-radius: 50%;
-                        background-color: #000000;
-                    }
-                 }
             }
         }
     }

@@ -359,10 +359,27 @@ var PDFMiniViewers = ( function() {
      * @return {string} The inline style string for this form element.
      */
     var getComboStyle = function( data, viewport ) {
-        var width   = ( data.rect[2] - data.rect[0] ) * viewport.scale;
-        var spacing = width / data.maxLen;
-        var color   = 'rgb(' + data.color.join(',') + ')';
-        return 'letter-spacing: calc(' + spacing + 'px - 1ch); color: ' + color + ';';
+        var style  = '';
+        var height = ( ( data.rect[3] - data.rect[1] ) * viewport.scale ) / 2;
+        if (  data.comb ) {
+            var width   = ( data.rect[2] - data.rect[0] ) * viewport.scale;
+            var spacing = width / data.maxLen;
+            style += 'letter-spacing: calc(' + spacing + 'px - 1ch); ';
+            style += 'font-size: ' + height + 'px; font-family: monospace, monospace; ';
+        } else if ( data.defaultAppearanceData ) {
+            if ( data.defaultAppearanceData.fontSize ) {
+                var size = data.defaultAppearanceData.fontSize * viewport.scale;
+                style += 'font-size: ' + size + 'px; ';
+            }
+        } else {
+            style += 'font-size: ' + height + 'px; ';
+        }
+        if ( data.color ) {
+            style += 'color: rgb(' + data.color.join(',') + ');';
+        } else {
+            style += 'color: rgb(0,0,0);';
+        }
+        return style;
     };
 
     var getMainToolbarHTML = function( total ) {
@@ -485,9 +502,11 @@ var PDFMiniViewers = ( function() {
     };
 
     var getWidgetHTML = function( pdf, data, viewport ) {
-        // console.log( pdf.annotationStorage.getValue( data.id ) );
-        console.log( data );
-        var elem, type = '', value = '';
+        // console.log( data );
+        var elem, type = '', value = pdf.annotationStorage.getValue( data.id );
+        if ( value ) {
+            value = value.value;
+        }
         switch( data.fieldType.toUpperCase() ) {
             // Button, Checkbox, and Radio.
             case 'BTN':
@@ -504,13 +523,31 @@ var PDFMiniViewers = ( function() {
                     if ( data.checkBox ) {
                         elem.setAttribute( 'type', 'checkbox' );
                         type = 'buttonWidgetAnnotation checkBox';
+
+                        if ( value === false ) {
+                            // Do nothing to this checkbox including setting its default value.
+                            elem.checked = false;
+                        } else if ( value === true ) {
+                            elem.checked = true;
+                            elem.setAttribute( 'value', data.exportValue );
+                        } else if ( data.fieldValue && data.fieldValue == data.exportValue ) {
+                            elem.checked = true;
+                            elem.setAttribute( 'value', data.exportValue );
+                        }
                     } else {
                         elem.setAttribute( 'type', 'radio' );
                         type = 'buttonWidgetAnnotation radioButton';
-                    }
-                    if ( data.exportValue == data.fieldValue ) {
-                        elem.checked = true;
-                        elem.setAttribute( 'value', data.exportValue );
+
+                        if ( value === false ) {
+                            // Do nothing to this radio including setting its default value.
+                            elem.checked = false;
+                        } else if ( value === true ) {
+                            elem.checked = true;
+                            elem.setAttribute( 'value', data.buttonValue );
+                        } else if ( data.fieldValue && data.fieldValue == data.buttonValue ) {
+                            elem.checked = true;
+                            elem.setAttribute( 'value', data.buttonValue );
+                        }
                     }
                     elem.addEventListener( 'change', updateAnnotationStorage );
                 }
@@ -519,13 +556,24 @@ var PDFMiniViewers = ( function() {
             case 'CH':
                 elem = document.createElement('SELECT');
                 elem.id = data.id;
+                if ( value ) {
+                    if ( ! Array.isArray( value ) ) {
+                        value = [ value ];
+                    }
+                } else {
+                    value = [];
+                }
                 if ( data.multiSelect ) {
                     elem.setAttribute( 'multiple', 'multiple' );
                 }
                 var options = '';
                 for( var i = 0; i < data.options.length; i++ ) {
                     options += '<option value="' + data.options[i].exportValue + '"';
-                    if ( data.fieldValue.includes( data.options[i].exportValue ) ) {
+                    if ( value.length > 0 ) {
+                        if ( value.includes( data.options[i].exportValue ) ) {
+                            options += ' selected="true"';
+                        } 
+                    } else if ( data.fieldValue.includes( data.options[i].exportValue ) ) {
                         options += ' selected="true"';
                     }
                     options += '>' + data.options[i].displayValue + '</option>';
@@ -536,22 +584,28 @@ var PDFMiniViewers = ( function() {
                 break;
             // Input and Textarea.
             case 'TX':
-                // console.log( pdf.annotationStorage.getValue( data.id ) ); // TODO: Complete this.
-                // var value = pdf.annotationStorage.getValue() data.fieldValue;
                 if ( data.multiLine ) {
                     elem = document.createElement('TEXTAREA');
+                    if ( value ) {
+                        elem.innerHTML = value;
+                    } else {
+                        elem.innerHTML = data.fieldValue;
+                    }
                 } else {
                     elem = document.createElement('INPUT');
                     elem.setAttribute( 'type', 'text' );
                     if ( data.comb ) {
                         elem.classList.add('comb');
-                        elem.setAttribute( 'style', getComboStyle( data, viewport ) );
+                    }
+                    if ( value ) {
+                        console.log( value );
+                        elem.setAttribute( 'value', value );
+                    } else {
+                        elem.setAttribute( 'value', data.fieldValue );
                     }
                 }
                 elem.id = data.id;
                 elem.setAttribute( 'maxlength', data.maxLen );
-                elem.setAttribute( 'value', data.fieldValue );
-                // elem.setAttribute( 'value', data.fieldValue );
                 elem.addEventListener( 'input', updateAnnotationStorage );
                 type = 'textWidgetAnnotation';
                 break;
@@ -570,6 +624,7 @@ var PDFMiniViewers = ( function() {
             elem.setAttribute( 'alt', data.fieldName );
         }
         elem.setAttribute( 'name', data.fieldName );
+        elem.setAttribute( 'style', getComboStyle( data, viewport ) );
         return [ elem, type ];
     };
 
@@ -1039,7 +1094,7 @@ var PDFMiniViewers = ( function() {
         // Save the data differently depending on the element type.
         switch( this.type.toUpperCase() ) {
             case 'CHECKBOX':
-                save = true;
+                save = this.checked;
                 break;
             case 'RADIO':
                 // Save selected radio, uncheck all other radios in group, and update DOM to match.
@@ -1058,7 +1113,16 @@ var PDFMiniViewers = ( function() {
                 } );
                 return;
             case 'SELECT-ONE':
+                // Save the selected option and deselect other options in the DOM.
                 save = this.value;
+                var options = this.options;
+                for ( var i = 0; i < options.length; i++ ) {
+                    if ( options[i].value == save ) {
+                        options[i].setAttribute( 'selected', 'true' );
+                    } else {
+                        options[i].removeAttribute('selected');
+                    }
+                }
                 break;
             case 'SELECT-MULTIPLE':
                 // Find and save all selected options and deselect other options in the DOM.
@@ -1067,7 +1131,7 @@ var PDFMiniViewers = ( function() {
                 for ( var i = 0; i < options.length; i++ ) {
                     if ( options[i].selected ) {
                         options[i].setAttribute( 'selected', 'true' );
-                        save.push( options[i].innerHTML );
+                        save.push( options[i].value );
                     } else {
                         options[i].removeAttribute('selected');
                     }
@@ -1075,16 +1139,7 @@ var PDFMiniViewers = ( function() {
                 // NOTE: Multi-select is not supported by PDFJS yet: https://github.com/mozilla/pdf.js/blob/d80651e5724686535ac4fbdfac5d5e280a16dbdb/src/display/annotation_layer.js#L1121
                 // #12189 and #12224
                 break;
-            case 'INPUT':
-                if ( this.classList.contains('comb') ) {
-                    pdf.annotationStorage.setValue( this.id, {
-                        'value': this.value,
-                        'formmattedValue': this.value
-                    } );
-                    return;
-                }
-                save = this.value;
-                break;
+            case 'TEXT': // INPUT
             case 'TEXTAREA':
                 // Use the input or textarea value directly.
                 save = this.value;
@@ -1092,6 +1147,7 @@ var PDFMiniViewers = ( function() {
         }
         // Save to PDFJS's annotation storage.
         pdf.annotationStorage.setValue( this.id, { 'value': save } );
+        // pdf.annotationStorage.resetModified();
     };
 
     return {
