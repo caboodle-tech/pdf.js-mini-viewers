@@ -70,6 +70,22 @@
   margin-right: 15px;
   cursor: pointer;
 }
+.pdf-mini-viewer .pdf-main-toolbar.single-page .page-up,
+.pdf-mini-viewer .pdf-main-toolbar.single-page .page-down,
+.pdf-mini-viewer .pdf-main-toolbar.single-page .page-wrapper {
+  pointer-events: none;
+  opacity: 0;
+}
+.pdf-mini-viewer .pdf-main-toolbar.no-page-up .page-up {
+  pointer-events: none;
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.pdf-mini-viewer .pdf-main-toolbar.no-page-down .page-down {
+  pointer-events: none;
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 .pdf-mini-viewer .pdf-viewer {
   overflow: auto;
   padding: 15px 0;
@@ -699,26 +715,38 @@
   height: 100%;
   cursor: pointer;
 }
+.pdf-mini-viewer .pdf-viewer .page .annotation-layer section.buttonWidgetAnnotation.checkBox input {
+  border: 1px solid #525659;
+}
+.pdf-mini-viewer .pdf-viewer .page .annotation-layer section.buttonWidgetAnnotation.radioButton input {
+  border: 1px solid #525659;
+}
 .pdf-mini-viewer .pdf-viewer .page .annotation-layer section.buttonWidgetAnnotation.radioButton input[type="radio"]:checked:before {
   top: 25%;
   left: 25%;
 }
 .pdf-mini-viewer .pdf-viewer .page .annotation-layer section.buttonWidgetAnnotation.checkBox input:disabled,
 .pdf-mini-viewer .pdf-viewer .page .annotation-layer section.buttonWidgetAnnotation.radioButton input:disabled {
-  background-color: grey;
+  border: 1px solid #525659;
+  background-color: rgba(82, 86, 89, 0.3);
   cursor: not-allowed;
 }
+.pdf-mini-viewer .pdf-viewer .page .annotation-layer section.choiceWidgetAnnotation select {
+  border: 1px solid #525659;
+}
 .pdf-mini-viewer .pdf-viewer .page .annotation-layer section.choiceWidgetAnnotation select:disabled {
-  background-color: grey;
+  background-color: rgba(82, 86, 89, 0.3);
   cursor: not-allowed;
 }
 .pdf-mini-viewer .pdf-viewer .page .annotation-layer section.textWidgetAnnotation input,
 .pdf-mini-viewer .pdf-viewer .page .annotation-layer section.textWidgetAnnotation textarea {
   padding: 5px;
+  border: 1px solid #525659;
 }
 .pdf-mini-viewer .pdf-viewer .page .annotation-layer section.textWidgetAnnotation input:disabled,
 .pdf-mini-viewer .pdf-viewer .page .annotation-layer section.textWidgetAnnotation textarea:disabled {
-  background-color: grey;
+  border: 1px solid #525659;
+  background-color: rgba(82, 86, 89, 0.3);
   cursor: not-allowed;
 }
 .pdf-mini-viewer .pdf-viewer .page .annotation-layer section.textWidgetAnnotation .comb {
@@ -848,7 +876,7 @@
     justify-content: center;
     align-items: center;
     cursor: pointer;
-    background-color: #f2f2f2;
+    background-color: #f1f1f1;
     border-radius: 50%;
     width: 35px;
     height: 35px;
@@ -908,7 +936,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: #f2f2f2;
+    background-color: #f1f1f1;
     border-radius: 50%;
     width: 35px;
     height: 35px;

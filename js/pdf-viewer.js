@@ -168,6 +168,7 @@ var PDFMiniViewers = ( function() {
                 page = total;
             }
             input.value = page;
+            updatePageButtons( input, page, total );
 
             var app = this.closest('.pdf-mini-viewer');
             var viewer = app.querySelector('.pdf-viewer');
@@ -181,6 +182,24 @@ var PDFMiniViewers = ( function() {
         }
     };
 
+    var updatePageButtons = function( input, page, total ) {
+        var mini    = input.closest('.pdf-mini-viewer');
+        var toolbar = mini.querySelector('.pdf-main-toolbar');
+        if ( ! total || total < 1 ) {
+            var total = parseInt( toolbar.querySelector('.page-wrapper .page-total').innerHTML );
+        }
+        if ( page <= 1 ) {
+            toolbar.classList.add('no-page-up');
+            toolbar.classList.remove('no-page-down');
+        } else if ( page >= total ) {
+            toolbar.classList.remove('no-page-up');
+            toolbar.classList.add('no-page-down');
+        } else {
+            toolbar.classList.remove('no-page-up');
+            toolbar.classList.remove('no-page-down');
+        }
+    };
+
     var eventPageDown = function() {
         var input = this.parentElement.querySelector('.page-wrapper .current-page');
         var page  = parseInt( input.value ) + 1;
@@ -189,6 +208,7 @@ var PDFMiniViewers = ( function() {
             page = total;
         }
         input.value = page;
+        updatePageButtons( input, page, total );
 
         var app = this.closest('.pdf-mini-viewer');
         var viewer = app.querySelector('.pdf-viewer');
@@ -208,6 +228,7 @@ var PDFMiniViewers = ( function() {
             page = 1;
         }
         input.value = page;
+        updatePageButtons( input, page, -1 );
         
         var app = this.closest('.pdf-mini-viewer');
         var viewer = app.querySelector('.pdf-viewer');
@@ -324,6 +345,7 @@ var PDFMiniViewers = ( function() {
             var modify = guess * dims[2];
             var page   = Math.floor( ( ( view.scrollTop + dims[0] + modify ) / dims[1] ) + 1 );
             document.querySelector('#' + view.dataset.id + ' .pdf-main-toolbar .current-page').value = page;
+            updatePageButtons( view, page, -1 );
         }
     };
 
@@ -386,6 +408,10 @@ var PDFMiniViewers = ( function() {
         // Main toolbar.
         var div = document.createElement('DIV');
         div.classList.add('pdf-main-toolbar');
+        div.classList.add('no-page-up');
+        if ( total === 1 ) {
+            div.classList.add('single-page');
+        }
         // Page up.
         var elem = document.createElement('DIV');
         elem.classList.add('page-up');
