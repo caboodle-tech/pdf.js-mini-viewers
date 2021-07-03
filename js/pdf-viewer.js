@@ -14,7 +14,9 @@ var PDFMiniViewers = ( function() {
         down: '<svg class="pdf-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M12 24l-8-9h6v-15h4v15h6z"/></svg>',
         download: '<svg class="pdf-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M12 21l-8-9h6v-12h4v12h6l-8 9zm9-1v2h-18v-2h-2v4h22v-4h-2z"/></svg>',
         expand: '<svg class="pdf-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M24 9h-2v-5h-7v-2h9v7zm-9 13v-2h7v-5h2v7h-9zm-15-7h2v5h7v2h-9v-7zm9-13v2h-7v5h-2v-7h9z"/></svg>',
+        fullscreen: '<svg class="pdf-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M24 10.999v-10.999h-11l3.379 3.379-13.001 13-3.378-3.378v10.999h11l-3.379-3.379 13.001-13z"/></svg>',
         minus: '<svg class="pdf-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M0 10h24v4h-24z"/></svg>',
+        normalScreen: '<svg class="pdf-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M6.957 5.543l11.5 11.5-1.414 1.414-11.5-11.5 1.414-1.414zm5.043 10.699l-4.242-4.242-4.379 4.379-3.379-3.378v10.999h11l-3.379-3.379 4.379-4.379zm1-16.242l3.379 3.379-4.379 4.379 4.242 4.242 4.379-4.379 3.379 3.378v-10.999h-11z"/></svg>',
         plus: '<svg class="pdf-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M24 10h-10v-10h-4v10h-10v4h10v10h4v-10h10z"/></svg>',
         print: '<svg class="pdf-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M14 20h-6v-1h6v1zm10-15v13h-4v6h-16v-6h-4v-13h4v-5h16v5h4zm-6 10h-12v7h12v-7zm0-13h-12v3h12v-3zm4 5.5c0-.276-.224-.5-.5-.5s-.5.224-.5.5.224.5.5.5.5-.224.5-.5zm-6 9.5h-8v1h8v-1z"/></svg>',
         reset: '<svg class="pdf-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M12 0c-3.31 0-6.291 1.353-8.459 3.522l-2.48-2.48-1.061 7.341 7.437-.966-2.489-2.488c1.808-1.808 4.299-2.929 7.052-2.929 5.514 0 10 4.486 10 10s-4.486 10-10 10c-3.872 0-7.229-2.216-8.89-5.443l-1.717 1.046c2.012 3.803 6.005 6.397 10.607 6.397 6.627 0 12-5.373 12-12s-5.373-12-12-12z"/></svg>',
@@ -56,7 +58,7 @@ var PDFMiniViewers = ( function() {
                 viewer.addEventListener( 'scroll', debounce( updateCurrentPage, 100 ), true );
                 viewer.addEventListener( 'click', goToBookmark, false );
 
-                var mainToolbar    = getMainToolbarHTML( pdf.numPages );
+                var mainToolbar    = getMainToolbarHTML( pdf.numPages, viewer.dataset.options );
                 var resizeToolbar  = getResizeToolbarHTML();
 
                 container.appendChild( mainToolbar );
@@ -265,6 +267,15 @@ var PDFMiniViewers = ( function() {
         );
     };
 
+    var eventToggleFullscreen = function() {
+        var mini = this.closest('.pdf-mini-viewer');
+        if ( mini.classList.contains('fullscreen-mode') ) {
+            mini.classList.remove('fullscreen-mode');
+        } else {
+            mini.classList.add('fullscreen-mode');
+        }
+    };
+
     var eventZoomCompress = function() {
         var viewer = this.closest('.pdf-mini-viewer').querySelector('.pdf-viewer');
         var zoomCtl = this.closest('.pdf-mini-viewer').querySelector('.pdf-resize-toolbar');
@@ -404,13 +415,22 @@ var PDFMiniViewers = ( function() {
         return style;
     };
 
-    var getMainToolbarHTML = function( total ) {
+    var getMainToolbarHTML = function( total, options ) {
+        if ( ! options ) {
+            options = '';
+        }
         // Main toolbar.
         var div = document.createElement('DIV');
         div.classList.add('pdf-main-toolbar');
         div.classList.add('no-page-up');
         if ( total === 1 ) {
             div.classList.add('single-page');
+        }
+        if ( options.indexOf('no-download') > -1 ) {
+            div.classList.add('no-download');
+        }
+        if ( options.indexOf('no-print') > -1 ) {
+            div.classList.add('no-print');
         }
         // Page up.
         var elem = document.createElement('DIV');
@@ -441,6 +461,17 @@ var PDFMiniViewers = ( function() {
         elem.classList.add('print');
         elem.innerHTML = ICON.print;
         elem.addEventListener( 'click', eventPrint );
+        div.appendChild( elem );
+        // Toogle fullscreen.
+        elem = document.createElement('DIV');
+        elem.classList.add('open-fullscreen');
+        elem.innerHTML = ICON.fullscreen;
+        elem.addEventListener( 'click', eventToggleFullscreen );
+        div.appendChild( elem );
+        elem = document.createElement('DIV');
+        elem.classList.add('close-fullscreen');
+        elem.innerHTML = ICON.normalScreen;
+        elem.addEventListener( 'click', eventToggleFullscreen );
         div.appendChild( elem );
         // Bookmark.
         elem = document.createElement('DIV');

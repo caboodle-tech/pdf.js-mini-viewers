@@ -1,9 +1,13 @@
 .pdf-mini-viewer {
   position: relative;
   display: block;
+  border: 1px solid #323639;
   max-width: 1200px;
   margin: 0 auto;
   overflow: hidden;
+  -webkit-box-shadow: 0px 2px 5px 0px rgba(0, 0, 0, 0.3);
+  -moz-box-shadow: 0px 2px 5px 0px rgba(0, 0, 0, 0.3);
+  box-shadow: 0px 2px 5px 0px rgba(0, 0, 0, 0.3);
 }
 .pdf-mini-viewer .pdf-main-toolbar {
   display: flex;
@@ -23,13 +27,10 @@
   cursor: pointer;
 }
 .pdf-mini-viewer .pdf-main-toolbar .page-up {
-  width: 40px;
-  margin-left: 15px;
-  cursor: pointer;
+  display: none;
 }
 .pdf-mini-viewer .pdf-main-toolbar .page-down {
-  width: 40px;
-  cursor: pointer;
+  display: none;
 }
 .pdf-mini-viewer .pdf-main-toolbar .page-wrapper {
   flex: 1;
@@ -65,6 +66,23 @@
   margin-right: 15px;
   cursor: pointer;
 }
+.pdf-mini-viewer .pdf-main-toolbar .open-fullscreen {
+  width: 40px;
+  margin-right: 15px;
+  cursor: pointer;
+}
+.pdf-mini-viewer .pdf-main-toolbar .open-fullscreen .pdf-icon {
+  height: 20px;
+}
+.pdf-mini-viewer .pdf-main-toolbar .close-fullscreen {
+  display: none;
+  width: 40px;
+  margin-right: 15px;
+  cursor: pointer;
+}
+.pdf-mini-viewer .pdf-main-toolbar .close-fullscreen .pdf-icon {
+  height: 20px;
+}
 .pdf-mini-viewer .pdf-main-toolbar .bookmark {
   width: 40px;
   margin-right: 15px;
@@ -85,6 +103,12 @@
   pointer-events: none;
   opacity: 0.5;
   cursor: not-allowed;
+}
+.pdf-mini-viewer .pdf-main-toolbar.no-download .download {
+  display: none;
+}
+.pdf-mini-viewer .pdf-main-toolbar.no-print .print {
+  display: none;
 }
 .pdf-mini-viewer .pdf-viewer {
   overflow: auto;
@@ -703,6 +727,12 @@
   margin-left: 5px;
   margin-right: 5px;
 }
+.pdf-mini-viewer .pdf-viewer .page .annotation-layer {
+  pointer-events: none;
+}
+.pdf-mini-viewer .pdf-viewer .page .annotation-layer section {
+  pointer-events: all;
+}
 .pdf-mini-viewer .pdf-viewer .page .annotation-layer section body,
 .pdf-mini-viewer .pdf-viewer .page .annotation-layer section input,
 .pdf-mini-viewer .pdf-viewer .page .annotation-layer section textarea,
@@ -860,7 +890,40 @@
 .pdf-mini-viewer.bookmarks-open .pdf-outline {
   right: 0;
 }
+.pdf-mini-viewer.fullscreen-mode {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  display: flex;
+  border: 0px none;
+  flex-direction: column;
+  width: 100%;
+  max-width: 100%;
+  z-index: 1000;
+}
+.pdf-mini-viewer.fullscreen-mode .pdf-main-toolbar .open-fullscreen {
+  display: none;
+}
+.pdf-mini-viewer.fullscreen-mode .pdf-main-toolbar .close-fullscreen {
+  display: inline-block;
+}
+.pdf-mini-viewer.fullscreen-mode .pdf-viewer {
+  flex: 1;
+}
 @media (min-width: 768px) {
+  .pdf-mini-viewer .pdf-main-toolbar .page-up {
+    display: inline-block;
+    width: 40px;
+    margin-left: 15px;
+    cursor: pointer;
+  }
+  .pdf-mini-viewer .pdf-main-toolbar .page-down {
+    display: inline-block;
+    width: 40px;
+    cursor: pointer;
+  }
   .pdf-mini-viewer .pdf-resize-toolbar {
     display: block;
     position: absolute;
