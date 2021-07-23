@@ -2,6 +2,9 @@ var PDFMiniViewers = ( function() {
 
     "use strict";
 
+    /*
+     * PDFMiniViewers global variables.
+     */
     var CMAPS;
     var DEBOUNCE_FUNCS = {};
     var DEBOUNCE_TIMER = {};
@@ -25,11 +28,21 @@ var PDFMiniViewers = ( function() {
     var PDFS = {};
     var THROTTLE_FUNC = {};
     var THROTTLE_TIMER = {};
-
+    
+    /**
+     * Clear the scroll check lock for the specified viewer.
+     *
+     * @param {Element} viewer The viewer to remover the lock from.
+     */
     var clearScrollLock = function( viewer ) {
         viewer.removeAttribute('data-scroll-lock');
     };
 
+    /**
+     * Convert the provided viewing area into a PMV and load the requested PDF into it.
+     *
+     * @param {Element} viewer The viewing area to convert into a PMV.
+     */
     var convertPdfs = function( viewer ) {
         
         // Asynchronous download PDF.
@@ -39,18 +52,22 @@ var PDFMiniViewers = ( function() {
             cMapPacked: true,
         } );
 
+        // Convert the viewing area into a PMV and display the PDF.
         loadingTask.promise.then(
             function( pdf ) {
+
+                // Store a global reference to this viewer.
                 var id = uid();
                 PDFS[ id ] = pdf;
-
+                
+                // Make the PMV container for this PDF.
                 var container = document.createElement('DIV');
                 container.id = id;
                 container.classList.add('pdf-mini-viewer');
-
+                
+                // Swap the users HTML with our PMV container.
                 viewer.parentNode.insertBefore( container, viewer );
                 viewer.parentNode.removeChild( viewer );
-
                 viewer.dataset.id = id;
                 viewer.dataset.zoom = '0.00';
                 viewer.classList.add('pdf-viewer');
@@ -58,25 +75,28 @@ var PDFMiniViewers = ( function() {
                 viewer.addEventListener( 'scroll', debounce( updateCurrentPage, 100 ), true );
                 viewer.addEventListener( 'click', goToBookmark, false );
 
-                var mainToolbar    = getMainToolbarHTML( pdf.numPages, viewer.dataset.options );
-                var resizeToolbar  = getResizeToolbarHTML();
-
+                // Add the controls for this PMW container.
+                var mainToolbar   = getMainToolbarHTML( pdf.numPages, viewer.dataset.options );
+                var resizeToolbar = getResizeToolbarHTML();
                 container.appendChild( mainToolbar );
                 container.appendChild( viewer );
                 container.appendChild( resizeToolbar );
 
+                // Record any padding the user may have added.
                 var styles = window.getComputedStyle( viewer );
                 var padding = parseInt( styles.paddingTop.replace( /\D+/g, '' ) );
                 padding += parseInt( styles.paddingBottom.replace( /\D+/g, '' ) );
                 viewer.dataset.scroll = padding;
 
+                // Asynchronously load and display the PDFs bookmarks if any.
                 pdf.getOutline().then(
                     renderBookmarks.bind( null, container ),
                     function( error ) {
                         console.error( error );
                     }
                 );
-
+                
+                // Load and display each page of the PDF one by one.
                 var loaded = 0;
                 while( loaded < pdf.numPages ) {
                     loaded++;
@@ -95,7 +115,14 @@ var PDFMiniViewers = ( function() {
         );
     };
 
-    // https://stackoverflow.com/a/52256801/3193156
+    /**
+     * A modified debounce function that limits how often expensive operations can run.
+     * Code inspired by {@link https://stackoverflow.com/a/52256801/3193156|this post}.
+     *
+     * @param {Function} func The function to call on a debounce.
+     * @param {int} delay How much time in milliseconds must pass before the function will run.
+     * @return {Function} An anonymous function that calls the request function.
+     */
     var debounce = function( func, delay ) {
         delay = delay || 250;
         var hash = 'F' + getStringHash( func.toString() );
@@ -111,17 +138,29 @@ var PDFMiniViewers = ( function() {
         }
     };
 
+    /**
+     * Run a debounced function.
+     *
+     * @param {String} hash The debounce function to check for and run; if it
+     *                      does not exist it has been run already.
+     */
     var doDebounce = function( hash ) {
         if ( DEBOUNCE_FUNCS[ hash ] ) {
             DEBOUNCE_FUNCS[ hash ][0].call( null, DEBOUNCE_FUNCS[ hash ][1] );
         }
     };
 
+    /**
+     * Toggle the bookmark menu (sidebar) open and closed.
+     */
     var eventBookmark = function() {
         var app = this.closest('.pdf-mini-viewer');
         app.classList.toggle('bookmarks-open');
     };
 
+    /**
+     * Trigger a download of the PDF.
+     */
     var eventDownload = function() {
         var mini = this.closest('.pdf-mini-viewer');
         var pdf  = PDFS[ mini.id ];
@@ -149,6 +188,12 @@ var PDFMiniViewers = ( function() {
         );
     };
 
+    /**
+     * Determine the full filename of the requested PDF.
+     *
+     * @param {Element} mini The viewer area of the current PMV.
+     * @return {String} The filename of the PDF being loaded into this viewer.
+     */
     var getFilename = function( mini ) {
         var viewer   = mini.querySelector('.pdf-viewer');
         var filename = viewer.dataset.pdf;
@@ -158,11 +203,16 @@ var PDFMiniViewers = ( function() {
         return filename;
     };
 
+    /**
+     * Respond to a page change event from the page selector (input).
+     */
     var eventPageChange = function() {
         if ( event.key == 'Enter' || event.keyCode == 13 ) {
+            // Get necessary information.
             var input = this.querySelector('.current-page');
             var page  = parseInt( input.value );
             var total = parseInt( this.querySelector('.page-total').innerHTML );
+            // Make sure the page number is within the valid range.
             if ( page < 1 ) { 
                 page = 1;
             }
@@ -171,7 +221,7 @@ var PDFMiniViewers = ( function() {
             }
             input.value = page;
             updatePageButtons( input, page, total );
-
+            // Lock the viewer for scroll events; blocks the scroll event firing unnecessarily.
             var app = this.closest('.pdf-mini-viewer');
             var viewer = app.querySelector('.pdf-viewer');
             viewer.dataset.scrollLock = true;
@@ -179,7 +229,7 @@ var PDFMiniViewers = ( function() {
             if ( pageElem ) {
                 pageElem.scrollIntoView( { block: 'start',  behavior: 'smooth' } );
             }
-
+            // Disable the scroll lock.
             setTimeout( clearScrollLock.bind( null, viewer ), 1000 );
         }
     };
