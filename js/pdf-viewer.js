@@ -8,6 +8,7 @@ var PDFMiniViewers = ( function() {
     var CMAPS;
     var DEBOUNCE_FUNCS = {};
     var DEBOUNCE_TIMER = {};
+    var FULLSCREEN_FUNC = {};
     var HEIGHT;
     var ICON = {
         bookmark: '<svg class="pdf-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M19 24l-7-6-7 6v-24h14v24z"/></svg>',
@@ -29,6 +30,16 @@ var PDFMiniViewers = ( function() {
     var THROTTLE_FUNC = {};
     var THROTTLE_TIMER = {};
     
+    /**
+     * Add a callback function (observer) to PMV to notify when a PDF goes fullscreen.
+     *
+     * @param {Function} func The function to register as a fullscreen observer.
+     */
+     var addFullscreenCallback = function( func ) {
+        var hash = getStringHash( func.toString() );
+        FULLSCREEN_FUNC[ hash ] = func;
+    };
+
     /**
      * Clear the scroll check lock for the specified viewer.
      *
@@ -342,8 +353,10 @@ var PDFMiniViewers = ( function() {
         var mini = this.closest('.pdf-mini-viewer');
         if ( mini.classList.contains('fullscreen-mode') ) {
             mini.classList.remove('fullscreen-mode');
+            notifyFullscreenCallbacks(false);
         } else {
             mini.classList.add('fullscreen-mode');
+            notifyFullscreenCallbacks(true)
         }
     };
 
@@ -1028,6 +1041,19 @@ var PDFMiniViewers = ( function() {
     };
 
     /**
+     * Notify all fullscreen observers (callback functions) that a PDF has gone fullscreen.
+     *
+     * @param {boolean} fullscreen True if a PDF has gone fullscreen, false if it has exited fullscreen.
+     */
+     var notifyFullscreenCallbacks = function( fullscreen ) {
+        for( var prop in FULLSCREEN_FUNC ) {
+            if ( FULLSCREEN_FUNC[prop] != null ) {
+                FULLSCREEN_FUNC[prop]( fullscreen );
+            }
+        }
+    };
+
+    /**
      * Handle reloading a page because of a resize or zoom event.
      *
      * @param {Element} viewer The viewer this PDF is loaded in.
@@ -1124,6 +1150,18 @@ var PDFMiniViewers = ( function() {
             }
         );
     };
+
+    /**
+     * Remove a callback function (observer) from PMV.
+     *
+     * @param {Function} func The function to unregister as a fullscreen observer.
+     */
+     var removeFullscreenCallback = function( func ) {
+        var hash = getStringHash( func.toString() );
+        FULLSCREEN_FUNC[ hash ] = null;
+        delete FULLSCREEN_FUNC[ hash ];
+    };
+
     /**
      * Receives a specific pages annotation layer data and builds the HTML
      * to display this on the page/
@@ -1435,7 +1473,9 @@ var PDFMiniViewers = ( function() {
     };
 
     return {
-        'initialize': initialize
+        'addFullscreenCallback': addFullscreenCallback,
+        'initialize': initialize,
+        'removeFullscreenCallback': removeFullscreenCallback
     };
 
 } )();
