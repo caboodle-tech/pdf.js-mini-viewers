@@ -2,9 +2,13 @@ var PDFMiniViewers = ( function() {
 
     "use strict";
 
+    /*
+     * PDFMiniViewers global variables.
+     */
     var CMAPS;
     var DEBOUNCE_FUNCS = {};
     var DEBOUNCE_TIMER = {};
+    var FULLSCREEN_FUNC = {};
     var HEIGHT;
     var ICON = {
         bookmark: '<svg class="pdf-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M19 24l-7-6-7 6v-24h14v24z"/></svg>',
@@ -14,7 +18,9 @@ var PDFMiniViewers = ( function() {
         down: '<svg class="pdf-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M12 24l-8-9h6v-15h4v15h6z"/></svg>',
         download: '<svg class="pdf-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M12 21l-8-9h6v-12h4v12h6l-8 9zm9-1v2h-18v-2h-2v4h22v-4h-2z"/></svg>',
         expand: '<svg class="pdf-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M24 9h-2v-5h-7v-2h9v7zm-9 13v-2h7v-5h2v7h-9zm-15-7h2v5h7v2h-9v-7zm9-13v2h-7v5h-2v-7h9z"/></svg>',
+        fullscreen: '<svg class="pdf-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M24 10.999v-10.999h-11l3.379 3.379-13.001 13-3.378-3.378v10.999h11l-3.379-3.379 13.001-13z"/></svg>',
         minus: '<svg class="pdf-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M0 10h24v4h-24z"/></svg>',
+        normalScreen: '<svg class="pdf-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M6.957 5.543l11.5 11.5-1.414 1.414-11.5-11.5 1.414-1.414zm5.043 10.699l-4.242-4.242-4.379 4.379-3.379-3.378v10.999h11l-3.379-3.379 4.379-4.379zm1-16.242l3.379 3.379-4.379 4.379 4.242 4.242 4.379-4.379 3.379 3.378v-10.999h-11z"/></svg>',
         plus: '<svg class="pdf-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M24 10h-10v-10h-4v10h-10v4h10v10h4v-10h10z"/></svg>',
         print: '<svg class="pdf-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M14 20h-6v-1h6v1zm10-15v13h-4v6h-16v-6h-4v-13h4v-5h16v5h4zm-6 10h-12v7h12v-7zm0-13h-12v3h12v-3zm4 5.5c0-.276-.224-.5-.5-.5s-.5.224-.5.5.224.5.5.5.5-.224.5-.5zm-6 9.5h-8v1h8v-1z"/></svg>',
         reset: '<svg class="pdf-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M12 0c-3.31 0-6.291 1.353-8.459 3.522l-2.48-2.48-1.061 7.341 7.437-.966-2.489-2.488c1.808-1.808 4.299-2.929 7.052-2.929 5.514 0 10 4.486 10 10s-4.486 10-10 10c-3.872 0-7.229-2.216-8.89-5.443l-1.717 1.046c2.012 3.803 6.005 6.397 10.607 6.397 6.627 0 12-5.373 12-12s-5.373-12-12-12z"/></svg>',
@@ -23,11 +29,31 @@ var PDFMiniViewers = ( function() {
     var PDFS = {};
     var THROTTLE_FUNC = {};
     var THROTTLE_TIMER = {};
+    
+    /**
+     * Add a callback function (observer) to PMV to notify when a PDF goes fullscreen.
+     *
+     * @param {Function} func The function to register as a fullscreen observer.
+     */
+     var addFullscreenCallback = function( func ) {
+        var hash = getStringHash( func.toString() );
+        FULLSCREEN_FUNC[ hash ] = func;
+    };
 
+    /**
+     * Clear the scroll check lock for the specified viewer.
+     *
+     * @param {Element} viewer The viewer to remover the lock from.
+     */
     var clearScrollLock = function( viewer ) {
         viewer.removeAttribute('data-scroll-lock');
     };
 
+    /**
+     * Convert the provided viewing area into a PMV and load the requested PDF into it.
+     *
+     * @param {Element} viewer The viewing area to convert into a PMV.
+     */
     var convertPdfs = function( viewer ) {
         
         // Asynchronous download PDF.
@@ -37,18 +63,22 @@ var PDFMiniViewers = ( function() {
             cMapPacked: true,
         } );
 
+        // Convert the viewing area into a PMV and display the PDF.
         loadingTask.promise.then(
             function( pdf ) {
+
+                // Store a global reference to this viewer.
                 var id = uid();
                 PDFS[ id ] = pdf;
-
+                
+                // Make the PMV container for this PDF.
                 var container = document.createElement('DIV');
                 container.id = id;
                 container.classList.add('pdf-mini-viewer');
-
+                
+                // Swap the users HTML with our PMV container.
                 viewer.parentNode.insertBefore( container, viewer );
                 viewer.parentNode.removeChild( viewer );
-
                 viewer.dataset.id = id;
                 viewer.dataset.zoom = '0.00';
                 viewer.classList.add('pdf-viewer');
@@ -56,25 +86,28 @@ var PDFMiniViewers = ( function() {
                 viewer.addEventListener( 'scroll', debounce( updateCurrentPage, 100 ), true );
                 viewer.addEventListener( 'click', goToBookmark, false );
 
-                var mainToolbar    = getMainToolbarHTML( pdf.numPages );
-                var resizeToolbar  = getResizeToolbarHTML();
-
+                // Add the controls for this PMW container.
+                var mainToolbar   = getMainToolbarHTML( pdf.numPages, viewer.dataset.options );
+                var resizeToolbar = getResizeToolbarHTML();
                 container.appendChild( mainToolbar );
                 container.appendChild( viewer );
                 container.appendChild( resizeToolbar );
 
+                // Record any padding the user may have added.
                 var styles = window.getComputedStyle( viewer );
                 var padding = parseInt( styles.paddingTop.replace( /\D+/g, '' ) );
                 padding += parseInt( styles.paddingBottom.replace( /\D+/g, '' ) );
                 viewer.dataset.scroll = padding;
 
+                // Asynchronously load and display the PDFs bookmarks if any.
                 pdf.getOutline().then(
                     renderBookmarks.bind( null, container ),
                     function( error ) {
                         console.error( error );
                     }
                 );
-
+                
+                // Load and display each page of the PDF one by one.
                 var loaded = 0;
                 while( loaded < pdf.numPages ) {
                     loaded++;
@@ -93,7 +126,14 @@ var PDFMiniViewers = ( function() {
         );
     };
 
-    // https://stackoverflow.com/a/52256801/3193156
+    /**
+     * A modified debounce function that limits how often expensive operations can run.
+     * Code inspired by {@link https://stackoverflow.com/a/52256801/3193156|this post}.
+     *
+     * @param {Function} func The function to call on a debounce.
+     * @param {int} delay How much time in milliseconds must pass before the function will run.
+     * @return {Function} An anonymous function that calls the request function.
+     */
     var debounce = function( func, delay ) {
         delay = delay || 250;
         var hash = 'F' + getStringHash( func.toString() );
@@ -109,17 +149,29 @@ var PDFMiniViewers = ( function() {
         }
     };
 
+    /**
+     * Run a debounced function.
+     *
+     * @param {String} hash The debounce function to check for and run; if it
+     *                      does not exist it has been run already.
+     */
     var doDebounce = function( hash ) {
         if ( DEBOUNCE_FUNCS[ hash ] ) {
             DEBOUNCE_FUNCS[ hash ][0].call( null, DEBOUNCE_FUNCS[ hash ][1] );
         }
     };
 
+    /**
+     * Toggle the bookmark menu (sidebar) open and closed.
+     */
     var eventBookmark = function() {
         var app = this.closest('.pdf-mini-viewer');
         app.classList.toggle('bookmarks-open');
     };
 
+    /**
+     * Trigger a download of the PDF.
+     */
     var eventDownload = function() {
         var mini = this.closest('.pdf-mini-viewer');
         var pdf  = PDFS[ mini.id ];
@@ -147,6 +199,12 @@ var PDFMiniViewers = ( function() {
         );
     };
 
+    /**
+     * Determine the full filename of the requested PDF.
+     *
+     * @param {Element} mini The viewer area of the current PMV.
+     * @return {String} The filename of the PDF being loaded into this viewer.
+     */
     var getFilename = function( mini ) {
         var viewer   = mini.querySelector('.pdf-viewer');
         var filename = viewer.dataset.pdf;
@@ -156,11 +214,16 @@ var PDFMiniViewers = ( function() {
         return filename;
     };
 
+    /**
+     * Respond to a page change event from the page selector (input).
+     */
     var eventPageChange = function() {
         if ( event.key == 'Enter' || event.keyCode == 13 ) {
+            // Get necessary information.
             var input = this.querySelector('.current-page');
             var page  = parseInt( input.value );
             var total = parseInt( this.querySelector('.page-total').innerHTML );
+            // Make sure the page number is within the valid range.
             if ( page < 1 ) { 
                 page = 1;
             }
@@ -169,7 +232,7 @@ var PDFMiniViewers = ( function() {
             }
             input.value = page;
             updatePageButtons( input, page, total );
-
+            // Lock the viewer for scroll events; blocks the scroll event firing unnecessarily.
             var app = this.closest('.pdf-mini-viewer');
             var viewer = app.querySelector('.pdf-viewer');
             viewer.dataset.scrollLock = true;
@@ -177,11 +240,18 @@ var PDFMiniViewers = ( function() {
             if ( pageElem ) {
                 pageElem.scrollIntoView( { block: 'start',  behavior: 'smooth' } );
             }
-
+            // Disable the scroll lock.
             setTimeout( clearScrollLock.bind( null, viewer ), 1000 );
         }
     };
 
+    /**
+     * Update the visual look of the page toggle arrows; disables unusable arrows.
+     *
+     * @param {Element} input The current page number box for the selected PMV.
+     * @param {int} page The page the user tried to go to.
+     * @param {int} total The highest allowed page number.
+     */
     var updatePageButtons = function( input, page, total ) {
         var mini    = input.closest('.pdf-mini-viewer');
         var toolbar = mini.querySelector('.pdf-main-toolbar');
@@ -200,6 +270,9 @@ var PDFMiniViewers = ( function() {
         }
     };
 
+    /**
+     * Respond to the page down arrow being pressed.
+     */
     var eventPageDown = function() {
         var input = this.parentElement.querySelector('.page-wrapper .current-page');
         var page  = parseInt( input.value ) + 1;
@@ -209,7 +282,7 @@ var PDFMiniViewers = ( function() {
         }
         input.value = page;
         updatePageButtons( input, page, total );
-
+        // Lock the viewer for scroll events; blocks the scroll event firing unnecessarily.
         var app = this.closest('.pdf-mini-viewer');
         var viewer = app.querySelector('.pdf-viewer');
         viewer.dataset.scrollLock = true;
@@ -217,10 +290,13 @@ var PDFMiniViewers = ( function() {
         if ( pageElem ) {
             pageElem.scrollIntoView( { block: 'start',  behavior: 'smooth' } );
         }
-        
+        // Disable the scroll lock.
         setTimeout( clearScrollLock.bind( null, viewer ), 500 );
     };
 
+    /**
+     * Respond to the page up arrow being pressed.
+     */
     var eventPageUp = function() {
         var input = this.parentElement.querySelector('.page-wrapper .current-page');
         var page  = parseInt( input.value ) - 1;
@@ -229,7 +305,7 @@ var PDFMiniViewers = ( function() {
         }
         input.value = page;
         updatePageButtons( input, page, -1 );
-        
+        // Lock the viewer for scroll events; blocks the scroll event firing unnecessarily.
         var app = this.closest('.pdf-mini-viewer');
         var viewer = app.querySelector('.pdf-viewer');
         viewer.dataset.scrollLock = true;
@@ -237,13 +313,18 @@ var PDFMiniViewers = ( function() {
         if ( pageElem ) {
             pageElem.scrollIntoView( { block: 'start',  behavior: 'smooth' } );
         }
-
+        // Disable the scroll lock.
         setTimeout( clearScrollLock.bind( null, viewer ), 500 );
     };
 
+    /**
+     * Respond to the print button being pressed.
+     */
     var eventPrint = function() {
+        // Get the PDF document from the viewers id.
         var mini = this.closest('.pdf-mini-viewer');
         var pdf  = PDFS[ mini.id ];
+        // Call the built in save method and make sure to send it the annotations for this PDF.
         pdf.saveDocument( pdf.annotationStorage ).then(
             // Success.
             function( data ) {
@@ -265,6 +346,23 @@ var PDFMiniViewers = ( function() {
         );
     };
 
+    /**
+     * Toggle this PDF in and out of fullscreen mode.
+     */
+    var eventToggleFullscreen = function() {
+        var mini = this.closest('.pdf-mini-viewer');
+        if ( mini.classList.contains('fullscreen-mode') ) {
+            mini.classList.remove('fullscreen-mode');
+            notifyFullscreenCallbacks(false);
+        } else {
+            mini.classList.add('fullscreen-mode');
+            notifyFullscreenCallbacks(true)
+        }
+    };
+
+    /**
+     * Respond to a viewers compress button being pressed.
+     */
     var eventZoomCompress = function() {
         var viewer = this.closest('.pdf-mini-viewer').querySelector('.pdf-viewer');
         var zoomCtl = this.closest('.pdf-mini-viewer').querySelector('.pdf-resize-toolbar');
@@ -274,6 +372,9 @@ var PDFMiniViewers = ( function() {
         rerenderPDF( viewer.dataset.id );
     };
 
+    /**
+     * Respond to a viewers expand button being pressed.
+     */
     var eventZoomExpand = function() {
         var viewer  = this.closest('.pdf-mini-viewer').querySelector('.pdf-viewer');
         var zoomCtl = this.closest('.pdf-mini-viewer').querySelector('.pdf-resize-toolbar');
@@ -283,6 +384,9 @@ var PDFMiniViewers = ( function() {
         rerenderPDF( viewer.dataset.id );
     };
 
+    /**
+     * Respond to a viewers zoom button being pressed.
+     */
     var eventZoomIn = function() {
         var control = this.closest('.pdf-resize-toolbar');
         var viewer  = this.closest('.pdf-mini-viewer').querySelector('.pdf-viewer');
@@ -302,6 +406,9 @@ var PDFMiniViewers = ( function() {
         }
     };
 
+    /**
+     * Respond to a viewers zoom out button being pressed.
+     */
     var eventZoomOut = function() {
         var control = this.closest('.pdf-resize-toolbar');
         var viewer  = this.closest('.pdf-mini-viewer').querySelector('.pdf-viewer');
@@ -321,6 +428,9 @@ var PDFMiniViewers = ( function() {
         }
     };
 
+    /**
+     * Respond to a viewers zoom reset button being pressed.
+     */
     var eventZoomReset = function() {
         var control = this.closest('.pdf-resize-toolbar');
         var viewer = this.closest('.pdf-mini-viewer').querySelector('.pdf-viewer');
@@ -329,18 +439,25 @@ var PDFMiniViewers = ( function() {
         rerenderPDF( viewer.dataset.id );
     };
 
-    // For small PDFs this math is overkill but larger ones need the accuracy.
+    /**
+     * Calculate the current page number based on scroll height of the viewer.
+     *
+     * @param {Event} e The event object that triggered this update call.
+     */
     var updateCurrentPage = function( e ) {
         var view = e.srcElement;
-        // Make sure to only respond to scrolls on the viewer and not scroll elements in the PDF.
+        // Make sure to only respond to scrolls on the viewer and not scroll elements inside the PDF.
         if ( ! view.dataset.scrollLock && view.classList.contains('pdf-viewer') ) {
-            // 0 = Viewer top and bottom padding combined.
-            // 1 = Page height.
-            // 2 = Page bottom margin.
+            /*
+             * 0 = Viewer top and bottom padding combined.
+             * 1 = Page height.
+             * 2 = Page bottom margin.
+             */
             var dims = view.dataset.scroll.split(':');
             dims[0] = parseFloat( dims[0] );
             dims[1] = parseFloat( dims[1] );
             dims[2] = parseFloat( dims[2] );
+            // For small PDFs this math is overkill but larger ones need the accuracy.
             var guess  = ( ( view.scrollTop + dims[0] ) / dims[1] ) + 1;
             var modify = guess * dims[2];
             var page   = Math.floor( ( ( view.scrollTop + dims[0] + modify ) / dims[1] ) + 1 );
@@ -349,9 +466,18 @@ var PDFMiniViewers = ( function() {
         }
     };
 
+    /**
+     * Build the HTML for annotations in this PDF; this could be form inputs, bookmarks, and links.
+     *
+     * @param {PDFDocumentProxy} pdf The PDF document (proxy).
+     * @param {Annotation} data The annotation data for this PDF.
+     * @param {PageViewport} viewport The viewport settings for this PDFs mini viewer.
+     * @return {HTML} This PDFs annotations compiled to HTML.
+     */
     var getAnnotationHTML = function( pdf, data, viewport ) {
         switch( data.subtype.toUpperCase() ) {
             case 'LINK':
+                // All document links / bookmarks / anchors.
                 var a = document.createElement('A');
                 var href = '';
                 if ( data.dest ) {
@@ -364,6 +490,7 @@ var PDFMiniViewers = ( function() {
                 a.setAttribute( 'href', href );
                 return [ a, 'link-annotation' ];
             case 'WIDGET':
+                // Advanced elements like forms.
                 return getWidgetHTML( pdf, data, viewport );
             default:
                 console.warn('Unsupported annotation type. Support might be added from: https://github.com/mozilla/pdf.js/blob/2a7827a7c67375a239284f9d37986a2941e51dba/test/unit/annotation_spec.js');
@@ -404,13 +531,29 @@ var PDFMiniViewers = ( function() {
         return style;
     };
 
-    var getMainToolbarHTML = function( total ) {
+    /**
+     * Build the HTMlf or this viewers main toolbar.
+     *
+     * @param {int} total The highest page in this PDF.
+     * @param {String} options A string of settings the user would like this viewer to use.
+     * @return {HTML} The HTML for this viewer. 
+     */
+    var getMainToolbarHTML = function( total, options ) {
+        if ( ! options ) {
+            options = '';
+        }
         // Main toolbar.
         var div = document.createElement('DIV');
         div.classList.add('pdf-main-toolbar');
         div.classList.add('no-page-up');
         if ( total === 1 ) {
             div.classList.add('single-page');
+        }
+        if ( options.indexOf('no-download') > -1 ) {
+            div.classList.add('no-download');
+        }
+        if ( options.indexOf('no-print') > -1 ) {
+            div.classList.add('no-print');
         }
         // Page up.
         var elem = document.createElement('DIV');
@@ -442,6 +585,17 @@ var PDFMiniViewers = ( function() {
         elem.innerHTML = ICON.print;
         elem.addEventListener( 'click', eventPrint );
         div.appendChild( elem );
+        // Toggle fullscreen.
+        elem = document.createElement('DIV');
+        elem.classList.add('open-fullscreen');
+        elem.innerHTML = ICON.fullscreen;
+        elem.addEventListener( 'click', eventToggleFullscreen );
+        div.appendChild( elem );
+        elem = document.createElement('DIV');
+        elem.classList.add('close-fullscreen');
+        elem.innerHTML = ICON.normalScreen;
+        elem.addEventListener( 'click', eventToggleFullscreen );
+        div.appendChild( elem );
         // Bookmark.
         elem = document.createElement('DIV');
         elem.classList.add('bookmark');
@@ -452,6 +606,11 @@ var PDFMiniViewers = ( function() {
         return div;
     };
     
+    /**
+     * Build the HTML for this viewers resize toolbar.
+     *
+     * @return {HTML} The HTML for this viewers resize toolbar. 
+     */
     var getResizeToolbarHTML = function() {
         // Resize toolbar.
         var div = document.createElement('DIV');
@@ -489,7 +648,14 @@ var PDFMiniViewers = ( function() {
         return div;
     };
 
-    // https://stackoverflow.com/a/13382873/3193156
+    /**
+     * Determine the size of scrollbars on this page so we can factor that into
+     * all the other calculations the viewer needs to do.
+     * 
+     * {@link https://stackoverflow.com/a/13382873/3193156|Source for this code}.
+     *
+     * @return {int} The size of the scrollbar width or default to 16.
+     */
     var getScrollbarWidth = function() {
 
         // Creating invisible container
@@ -516,6 +682,14 @@ var PDFMiniViewers = ( function() {
         return scrollbarWidth;
     };
 
+    /**
+     * Generate the unique hash of a string. Used for things like the debounce function
+     * to track functions easier.
+     * 
+     * @param {String} string The string to hash; objects and functions will be converted to
+     *                        their string representations.
+     * @return {String} A unique hash of the provided string.
+     */
     var getStringHash = function( string ) {
         var hash = 0, i = 0, len = string.length;
         while ( i < len ) {
@@ -527,10 +701,18 @@ var PDFMiniViewers = ( function() {
         return hash;
     };
 
+    /**
+     * Build the HTML for advanced widgets in this PDF.
+     *
+     * @param {PDFDocumentProxy} pdf The PDF document (proxy).
+     * @param {Annotation} data The annotation data for this PDF.
+     * @param {PageViewport} viewport The viewport settings for this PDFs mini viewer.
+     * @return {HTML} This PDFs advanced widget compiled to HTML.
+     */
     var getWidgetHTML = function( pdf, data, viewport ) {
-        // console.log( data );
         var elem, type = '', value = pdf.annotationStorage.getValue( data.id );
         if ( value ) {
+            // Unpack value.
             value = value.value;
         }
         switch( data.fieldType.toUpperCase() ) {
@@ -654,22 +836,31 @@ var PDFMiniViewers = ( function() {
         return [ elem, type ];
     };
 
+    /**
+     * Jump to the selected bookmark (anchor) in the viewer.
+     * 
+     * NOTE: We have to create new links and click them otherwise clicking the original link
+     * in the PDF will create an infinite loop of calling this function.
+     *
+     * @return {null} Used as a short circuit only.
+     */
     var goToBookmark = function() {
         if ( event.srcElement ) {
             if ( event.srcElement.tagName == 'A' ) {
                 event.preventDefault();
+                // Get the bookmark (anchor) information.
                 var view = this.closest('.pdf-mini-viewer').querySelector('.pdf-viewer');
                 var pdf  = PDFS[ view.dataset.id ];
                 var link = event.srcElement;
-
+                // If this is to an external site go and short circuit to avoid an infinite loop.
                 if ( link.target.toUpperCase() == '_BLANK' ) {
-                    // Create a temporary link otherwise we cause an infinite loop by clicking the link.
                     var a = document.createElement('A');
                     a.setAttribute( 'href', link.href );
                     a.setAttribute( 'target', '_blank' );
                     a.click();
                     return;
                 }
+                // Link is internal, calculate what page to go to and then scroll it into view.
                 link = link.href.substr( event.srcElement.href.indexOf('#') + 1 );
                 link = JSON.parse( decodeURIComponent( link ) );
                 pdf.getPageIndex( link[0] ).then( 
@@ -707,6 +898,11 @@ var PDFMiniViewers = ( function() {
         }
     };
 
+    /**
+     * When the users browser widow resizes we need to redraw (reload) all the
+     * PDF pages to the new available size. This function will call each PDF
+     * one by one and update them.
+     */
     var handleWindowResize = function() {
         for ( var prop in PDFS ) {
             var viewer = document.querySelector('.pdf-viewer[data-id="' + prop + '"]');
@@ -745,8 +941,15 @@ var PDFMiniViewers = ( function() {
         }
     };
 
+    /**
+     * Build the HTML for this viewer and load the requested PDF into it.
+     *
+     * @param {Element} viewer The original HTML element indicating the location to place the PMV.
+     * @param {PDFPageProxy} PDFPageProxy The page data for this specific page of the PDF.
+     */
     var loadPage = function( viewer, PDFPageProxy ) {
 
+        // Grab the PDFDocumentProxy object for this PDF.
         var pdf = PDFS[ viewer.dataset.id ];
 
         // Start in desktop mode using an approximation of actual size as the scale.
@@ -763,9 +966,11 @@ var PDFMiniViewers = ( function() {
             scale = parseFloat( ( browserUseableWidth / unscaledViewport.width ).toFixed(1) );
         }
         
+        // Set the viewers viewport scale and initial style.
         var viewport = PDFPageProxy.getViewport( { scale: scale } );
         var style = 'width: ' + viewport.width + 'px; height: ' + viewport.height + 'px;';
 
+        // Page container for all of this pages content.
         var page = document.createElement('DIV');
         page.classList.add('page');
         page.dataset.pageNumber = PDFPageProxy.pageNumber;
@@ -773,30 +978,35 @@ var PDFMiniViewers = ( function() {
         page.setAttribute( 'role', 'region' );
         page.setAttribute( 'style', style );
 
+        // Canvas overlay for this page.
         var canvasWrapper = document.createElement('DIV');
         canvasWrapper.classList.add('canvas-wrapper');
         canvasWrapper.setAttribute( 'style', style );
-
         var canvas = document.createElement('CANVAS');
         canvas.height = viewport.height;
         canvas.width = viewport.width;
         canvas.setAttribute( 'style', style );
         canvasWrapper.appendChild( canvas );
 
+        // Text layer overlay for this page; so users can highlight text from the canvas.
         var textLayer = document.createElement('DIV');
         textLayer.classList.add('text-layer');
         textLayer.setAttribute( 'style', style );
 
+        // Annotation layer overlay for this page so uses can interact with links and forms.
         var annotationLayer = document.createElement('DIV');
         annotationLayer.classList.add('annotation-layer');
         annotationLayer.setAttribute( 'style', style );
 
+        // Add it all to the page.
         page.appendChild( canvasWrapper );
         page.appendChild( textLayer );
         page.appendChild( annotationLayer );
 
+        // Add the page to the viewer.
         viewer.appendChild( page );
 
+        // Record the padding and scrollbar information if this is the first page.
         if ( PDFPageProxy.pageNumber == 1 ) {
             var zoomCtl = viewer.parentElement.querySelector('.pdf-resize-toolbar');
             var styles  = window.getComputedStyle( page );
@@ -805,7 +1015,7 @@ var PDFMiniViewers = ( function() {
             zoomCtl.classList.add( mode );
         }
 
-// ===================================  
+        // Render the canvas of this page; what the user visually sees as the PDF.
         var renderContext = {
             canvasContext: canvas.getContext('2d'),
             viewport: viewport,
@@ -813,6 +1023,7 @@ var PDFMiniViewers = ( function() {
         };
         PDFPageProxy.render( renderContext );
 
+        // Render this pages text into the text layer element.
         PDFPageProxy.getTextContent().then(
             renderTextLayer.bind( null, textLayer, PDFPageProxy.streamTextContent(), viewport ),
             function( error ) {
@@ -820,6 +1031,7 @@ var PDFMiniViewers = ( function() {
             }
         );
 
+        // Render this pages annotations into the annotations layer element.
         PDFPageProxy.getAnnotations().then(
             renderAnnotationLayer.bind( null, pdf, annotationLayer, viewport ),
             function( error ) {
@@ -828,8 +1040,28 @@ var PDFMiniViewers = ( function() {
         );
     };
 
+    /**
+     * Notify all fullscreen observers (callback functions) that a PDF has gone fullscreen.
+     *
+     * @param {boolean} fullscreen True if a PDF has gone fullscreen, false if it has exited fullscreen.
+     */
+     var notifyFullscreenCallbacks = function( fullscreen ) {
+        for( var prop in FULLSCREEN_FUNC ) {
+            if ( FULLSCREEN_FUNC[prop] != null ) {
+                FULLSCREEN_FUNC[prop]( fullscreen );
+            }
+        }
+    };
+
+    /**
+     * Handle reloading a page because of a resize or zoom event.
+     *
+     * @param {Element} viewer The viewer this PDF is loaded in.
+     * @param {PDFPageProxy} PDFPageProxy The page data for this specific page of the PDF.
+     */
     var reloadPage = function( viewer, PDFPageProxy ) {
 
+        // Grab the PDFDocumentProxy object for this PDF.
         var pdf = PDFS[ viewer.dataset.id ];
 
         // Start in desktop mode using an approximation of actual size as the scale.
@@ -853,13 +1085,15 @@ var PDFMiniViewers = ( function() {
         }
         scale += zoom;
         
+        // Update the viewers viewport scale and style.
         var viewport = PDFPageProxy.getViewport( { scale: scale } );
         var style = 'width: ' + viewport.width + 'px; height: ' + viewport.height + 'px;';
 
+        // Update the page containers style.
         var page = viewer.querySelector('.page[data-page-number="' + PDFPageProxy.pageNumber + '"]');
         page.setAttribute( 'style', style );
 
-        // Update scroll information.
+        // Update scroll information; run on the first page only and use for all other pages.
         if ( PDFPageProxy.pageNumber == 1 ) {
             var zoomCtl = viewer.parentElement.querySelector('.pdf-resize-toolbar');
             var padding = viewer.dataset.scroll.split(':')[0];
@@ -869,9 +1103,11 @@ var PDFMiniViewers = ( function() {
             zoomCtl.classList.add( mode );
         }
 
+        // Update the canvas wrapper styles.
         var canvasWrapper = page.querySelector('.canvas-wrapper');
         canvasWrapper.setAttribute( 'style', style );
 
+        // Replace the actual canvas with a new one having the correct styles.
         var oldCanvas = canvasWrapper.querySelector('canvas');
         var newCanvas = document.createElement('CANVAS');
         newCanvas.height = viewport.height;
@@ -880,14 +1116,17 @@ var PDFMiniViewers = ( function() {
         canvasWrapper.removeChild( oldCanvas );
         canvasWrapper.appendChild( newCanvas );
 
+        // Update the text layer styles.
         var textLayer = page.querySelector('.text-layer');
         textLayer.setAttribute( 'style', style );
         textLayer.innerHTML = '';
 
+        // Update the annotation layer styles.
         var annotationLayer = page.querySelector('.annotation-layer');
         annotationLayer.setAttribute( 'style', style );
         annotationLayer.innerHTML = '';
- 
+        
+        // Render the (new) canvas for this page.
         var renderContext = {
             canvasContext: newCanvas.getContext('2d'),
             viewport: viewport,
@@ -895,13 +1134,15 @@ var PDFMiniViewers = ( function() {
         };
         PDFPageProxy.render( renderContext );
 
+        // Update the text layer based on the PDFs new size.
         PDFPageProxy.getTextContent().then(
             renderTextLayer.bind( null, textLayer, PDFPageProxy.streamTextContent(), viewport ),
             function( error ) {
                 console.error( error );
             }
         );
-
+        
+        // Update the annotation layer based on the PDFs new size. 
         PDFPageProxy.getAnnotations().then(
             renderAnnotationLayer.bind( null, pdf, annotationLayer, viewport ),
             function( error ) {
@@ -910,6 +1151,26 @@ var PDFMiniViewers = ( function() {
         );
     };
 
+    /**
+     * Remove a callback function (observer) from PMV.
+     *
+     * @param {Function} func The function to unregister as a fullscreen observer.
+     */
+     var removeFullscreenCallback = function( func ) {
+        var hash = getStringHash( func.toString() );
+        FULLSCREEN_FUNC[ hash ] = null;
+        delete FULLSCREEN_FUNC[ hash ];
+    };
+
+    /**
+     * Receives a specific pages annotation layer data and builds the HTML
+     * to display this on the page/
+     *
+     * @param {PDFPageProxy} pdf The PDF page (proxy).
+     * @param {Element} annotationLayer The element to place the annotations HTML inside of.
+     * @param {PageViewport} viewport The viewport settings for this PDFs mini viewer.
+     * @param {Annotation} annotationsData The annotation data for this page.
+     */
     var renderAnnotationLayer = function( pdf, annotationLayer, viewport, annotationsData ) {
         var previousDest = '';
         var previousLeft = 0;
@@ -923,7 +1184,7 @@ var PDFMiniViewers = ( function() {
 
             if ( data.subtype.toUpperCase() == 'LINK' && data.dest ) {
                 currentHash = data.dest[0].num + ':' + data.dest[2] + ':' + data.dest[3];
-                // Correct dims
+                // Correct dimensions for multi-line links.
                 if ( previousDest == currentHash ) {
                     width -= previousLeft - left;
                     left   = previousLeft;
@@ -933,6 +1194,7 @@ var PDFMiniViewers = ( function() {
                 }
             }
 
+            // Get the HTML for this annotation.
             var html = getAnnotationHTML( pdf, data, viewport );
 
             if ( ! html[1] ) {
@@ -948,8 +1210,15 @@ var PDFMiniViewers = ( function() {
         }
     };
 
+    /**
+     * If bookmarks were found for this PDF create the bookmark menu otherwise hide it.
+     *
+     * @param {Element} container The element to place the bookmarks for this PDF.
+     * @param {Array} bookmarks A multi-dimensional array of this pages bookmarks if any.
+     */
     var renderBookmarks = function( container, bookmarks ) {
         if ( bookmarks && bookmarks.length > 0 ) {
+            // Bookmarks can be nested.
             var results = renderBookmarksRecursively( bookmarks );
             var outline = document.createElement('DIV');
             outline.classList.add('pdf-outline');
@@ -964,6 +1233,12 @@ var PDFMiniViewers = ( function() {
         }
     };
 
+    /**
+     * Render a complete branch of a bookmark; bookmarks can be nested infinitely.
+     *
+     * @param {Array} bookmarks A multi-dimensional array of this pages bookmarks if any.
+     * @return {HTML} The HTML for an nested UL that makes up his PDFs bookmark structure.
+     */
     var renderBookmarksRecursively = function( bookmarks ) {
         if ( bookmarks.length < 1 ) {
             return '';
@@ -994,6 +1269,14 @@ var PDFMiniViewers = ( function() {
         return results + '</ul>';
     };
 
+    /**
+     * Asynchronous response to the text layer rendering for a page.
+     *
+     * @param {Element} textLayer The element to load the text content into.
+     * @param {ReadableStream} stream The stream for this text content.
+     * @param {PageViewport} viewport The viewport object for this viewer.
+     * @param {Object} textContent Text content object holding lines of text.
+     */
     var renderTextLayer = function( textLayer, stream, viewport, textContent ) {
         pdfjsLib.renderTextLayer( {
             textContent: textContent,
@@ -1006,7 +1289,13 @@ var PDFMiniViewers = ( function() {
             enhanceTextSelection: true
         } );
     };
-
+    
+    /**
+     * Re-render an existing PDF starting for the current page outward to
+     * minimize the visual loading effect the user sees.
+     *
+     * @param {String} id The id of the PDF to operate on.
+     */
     var rerenderPDF = function ( id ) {
         var pdf = PDFS[id];
         if ( pdf ) {
@@ -1057,6 +1346,10 @@ var PDFMiniViewers = ( function() {
         }
     };
 
+    /**
+     * Throttle a function call to insure that it can only run
+     * once during a set period of time.
+     */
     var throttle = function( func, delay ) {
         delay = delay || 250;
         var hash = 'F' + getStringHash( func.toString() );
@@ -1081,6 +1374,9 @@ var PDFMiniViewers = ( function() {
         }
     };
 
+    /**
+     * Toggle the bookmark menu for a viewer open and closed.
+     */
     var toggleBookmarkSubMenu = function() {
         if ( event.path ) {
             for ( var i = 0; i < event.path.length; i++ ) {
@@ -1098,7 +1394,7 @@ var PDFMiniViewers = ( function() {
     
     /**
      * Generate a fairly unique ID for use as an HTML ID.
-     * {@link https://gist.github.com/gordonbrander/2230317#gistcomment-1713405|Source}
+     * {@link https://gist.github.com/gordonbrander/2230317#gistcomment-1713405|Source}.
      * 
      * @return {String} A 14 character unique ID.
      */
@@ -1177,7 +1473,9 @@ var PDFMiniViewers = ( function() {
     };
 
     return {
-        'initialize': initialize
+        'addFullscreenCallback': addFullscreenCallback,
+        'initialize': initialize,
+        'removeFullscreenCallback': removeFullscreenCallback
     };
 
 } )();

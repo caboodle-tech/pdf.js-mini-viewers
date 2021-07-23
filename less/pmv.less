@@ -1,9 +1,11 @@
 .pdf-mini-viewer {
     position: relative;
     display: block;
+    border: 1px solid @toolbar-bg;
     max-width: 1200px;
     margin: 0 auto;
     overflow: hidden;
+    .drop-shadow();
 
     .pdf-main-toolbar {
         display: flex;
@@ -23,14 +25,11 @@
         }
         
         .page-up {
-            width: 40px;
-            margin-left: 15px;
-            cursor: pointer;
+            display: none;
         }
         
         .page-down {
-            width: 40px;
-            cursor: pointer;
+            display: none;
         }
         
         .page-wrapper {
@@ -71,6 +70,27 @@
             margin-right: 15px;
             cursor: pointer;
         }
+
+        .open-fullscreen {
+            width: 40px;
+            margin-right: 15px;
+            cursor: pointer;
+
+            .pdf-icon {
+                height: 20px;
+            }
+        }
+
+        .close-fullscreen  {
+            display: none;
+            width: 40px;
+            margin-right: 15px;
+            cursor: pointer;
+
+            .pdf-icon {
+                height: 20px;
+            }
+        }
         
         .bookmark {
             width: 40px;
@@ -100,6 +120,18 @@
                 cursor: not-allowed;
             }
         }
+
+        &.no-download {
+            .download {
+                display: none;
+            }
+        }
+
+        &.no-print {
+            .print {
+                display: none;
+            }
+        }
     }
 
     .pdf-viewer {
@@ -121,8 +153,10 @@
             @import "pdfjs.less";
 
             .annotation-layer {
+                pointer-events: none; // Allow text highlighting through annotation layer.
 
                 section {
+                    pointer-events: all; // Allow interaction with forms still.
 
                     body, input, textarea, select, button {
                         outline: none;
@@ -330,7 +364,51 @@
         }
     }
 
+    &.fullscreen-mode {
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        display: flex;
+        border: 0px none;
+        flex-direction: column;
+        width: 100%;
+        max-width: 100%;
+        z-index: 1000;
+
+        .pdf-main-toolbar {
+
+            .open-fullscreen {
+               display: none;
+            }
+    
+            .close-fullscreen  {
+                display: inline-block;
+            }
+        }
+
+        .pdf-viewer {
+            flex: 1;
+        }
+    }
+
     @media ( min-width: 768px ) {
+        .pdf-main-toolbar {
+            .page-up {
+                display: inline-block;
+                width: 40px;
+                margin-left: 15px;
+                cursor: pointer;
+            }
+            
+            .page-down {
+                display: inline-block;
+                width: 40px;
+                cursor: pointer;
+            }
+        }
+
         .pdf-resize-toolbar {
             display: block;
             position: absolute;
