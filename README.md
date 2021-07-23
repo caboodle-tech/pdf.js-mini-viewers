@@ -1,12 +1,46 @@
-# PDF.js Mini Viewers (PMV)
-PDF.js Mini Viewers offers a completely different web viewer experience than the one that comes with the [PDF.js](https://github.com/mozilla/pdf.js) library natively. PMV is designed to be an easy drop-in for any project or website that needs the ability to display PDFs. PMV was originally created for use with the [JamsEDU](https://github.com/caboodle-tech/jams-edu) application to easily embedded multiple PDFs in a single page.
+# PDF.js Mini Viewers (PMV) <img height="20" src="badges/version.svg" alt="v1.0.0"> <img height="20" src="badges/license.svg" alt="MIT license">
+PDF.js Mini Viewers offers a completely different web viewer experience than the one that comes with the [PDF.js](https://github.com/mozilla/pdf.js) library natively. PMV is designed to be an easy drop-in for any project or website that needs the ability to display PDFs. PMV was originally created for use with the [JamsEDU](https://github.com/caboodle-tech/jams-edu) application to easily embedded multiple PDFs on a single page.
 
-PMV is licensed as: MIT
+**PDF.js (PDFJS)**
 
-## PDF.js (PDFJS)
-[PDF.js](https://github.com/mozilla/pdf.js) is a Portable Document Format (PDF) viewer built with HTML5; PDF.js is community-driven and supported by Mozilla.
+[PDF.js](https://github.com/mozilla/pdf.js) is a Portable Document Format (PDF) viewer built with HTML5. PDFJS is community-driven and supported by Mozilla. PMV is built on top of PDFJS which uses the Apache-2.0 license.
 
-PDFJS is licensed: Apache-2.0
+PDFJS: <img height="20" src="badges/pdfjs-license.svg" alt="Apache-2.0 license">
 
-## Alpha
-This application is currently in alpha development. Please see the [Version 1.0 Release](https://github.com/caboodle-tech/pdf.js-mini-viewers/projects) project board for a road map of where things are. Contributions are welcome!
+## Demo
+You can view the [live demo here](https://caboodle-tech.github.io/pdf.js-mini-viewers/).
+
+## Installation
+Your project will need to copy in everything from the `css` and `js` directory.
+
+You can separate the JavaScript files from the CMAP files but you will need to tell PMV where you put them; see the usage section for more information.
+
+## Usage
+1. Include the PDFJS script `pdf.js` on every page you wish to display a PDF; this script must be loaded before the next script.
+2. Include the PMV script `pdf-viewer.js` on every page you wish to display a PDF.
+3. At the bottom of the page or from another function that is already part of your site, such as a document ready function, initialize PMV:
+```javascript
+/*
+Paths can be relative or absolute but should be on the same server:
+path/to/pdf-worker.js ==> Tell PMV where pdf-worker.js is located
+path/to/cmaps         ==> Tell PMV where the CMAP folder is located.
+*/
+PDFMiniViewers.initialize( 'path/to/pdf-worker.js', 'path/to/cmaps' );
+```
+
+After you initialize PMV it will automatically search the page for PDF divs to convert into mini viewers. Here is the basic HTML you will need to add:
+
+```html
+<div data-pdf="path/to/your.pdf"></div>
+```
+
+You can hide the print and download buttons by adding the following option(s). Keep in mind that a semi tech savvy user can easily bypass this restriction since the PDF source URL is exposed. You should treat any PDF you show to users as printable or downloadable from a security perspective.
+
+```html
+<div data-pdf="path/to/your.pdf" data-options="no-print no-download"></div>
+```
+
+If you dynamically add PDFs to a page you can call the initialize function again. PMV protects from duplicate PDF processing and will only convert new PDFs into a mini viewer.
+
+## Contributions
+PMV is an open source community supported project, if you would like to help please consider <a href="https://github.com/caboodle-tech/pdf.js-mini-viewers/issues" target="_blank">tackling an issue</a> or <a href="https://ko-fi.com/caboodletech" target="_blank">making a donation</a> to keep the project alive.
