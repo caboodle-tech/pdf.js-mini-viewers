@@ -8,7 +8,7 @@ PDF.js Mini Viewers offers a completely different web viewer experience than the
 <img height="20" src="badges/pdfjs-license.svg" alt="Apache-2.0 license">
 
 ## Demo
-You can view the [live demo here](https://caboodle-tech.github.io/pdf.js-mini-viewers/).
+You can view a [live demo here](https://caboodle-tech.github.io/pdf.js-mini-viewers/).
 
 ## Installation
 Your project will need to copy in everything from the `css` and `js` directory.
