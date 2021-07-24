@@ -1,0 +1,77 @@
+# Workflow name.
+name: Compile New GitHub Pages
+
+# Control when this action will run.
+on:
+  push:
+    branches: [main]
+
+    # Allow manually running this workflow from the repo's Action tab.
+    workflow_dispatch:
+
+# Control what to do:
+jobs:
+  compile: # Used as the jobs name if workflow was not named.
+  # Only run if we added the word compile to the commit message.
+    if: "contains(github.event.commits[0].message, 'compile')"
+    runs-on: ubuntu-latest
+
+    steps:
+      # Stash files we want to keep for the gh-pages site.
+      - name: Stash website files
+        run: |
+          mv badges/ ../badges
+          mv css/ ../css
+          mv js/ ../js
+          mv pdfs/ ../pdfs
+          mv index.html ../index.html
+          mv LICENSE ../LICENSE
+          echo "Stashed files for website up 1 directory"
+
+      # Create a shell script that creates the gh-pages branch if it does not exist
+      - name: Checking if website branch exists
+        run: |
+          git config --global user.name "$(git --no-pager log --format=format:'%an' -n 1)"
+          git config --global user.email "$(git --no-pager log --format=format:'%ae' -n 1)"
+          touch wbc.sh
+          echo "#!/bin/bash" >> wbc.sh
+          echo "check=\"$(git ls-remote --heads | grep gh-pages)"\" >> wbc.sh
+          echo "if [ -z \"\$check\" ]" >> wbc.sh
+          echo "then" >> wbc.sh
+          echo "  echo \"GitHub pages branch does not exist, creating now\"" >> wbc.sh
+          echo "  git checkout -b gh-pages" >> wbc.sh
+          echo "  git push --set-upstream origin gh-pages" >> wbc.sh
+          echo "else" >> wbc.sh
+          echo "  echo \"GitHub pages branch exists\"" >> wbc.sh
+          echo "fi" >> wbc.sh
+          chmod +x wbc.sh
+          ./wbc.sh
+          rm wbc.sh
+      
+      # Checkout the gh-pages (website) branch.
+      - name: Checkout gh-pages branch
+        uses: actions/checkout@v2
+        with:
+          ref: gh-pages
+
+      # Delete all files in the gh-pages branch and replace with the files stashed.
+      - name: Pushing to gh-pages branch
+        run: |
+          rm * -r
+          git rm -r --cached .
+          echo "Copy stashed files into gh-pages branch"
+          cp ../badges/* . -r
+          cp ../css/* . -r
+          cp ../js/* . -r
+          cp ../pdfs/* . -r
+          cp ../index.html .
+          cp ../LICENSE .
+          rm ../badges -r
+          rm ../css -r
+          rm ../js -r
+          rm ../pdfs -r
+          rm ../index.html
+          rm ../LICENSE
+          git add .
+          git commit -m "workflow auto compile gh-pages"
+          git push
