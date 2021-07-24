@@ -19,18 +19,23 @@
         .pdf-mini-viewer {
             margin-bottom: 25px;
         }
+        .pdf-mini-viewer.fullscreen-mode {
+            margin-bottom: 0;
+        }
     </style>
 </head>
 <body>
     <div id="intro">
-        <h1>PDF.js Mini Viewers Demo (v1.0)</h1>
+        <h1>PDF.js Mini Viewers Demo</h1>
         <p>
             This is a simple demonstration of PDF.js Mini Viewers (PMV), it should look great on mobile devices, tablets, and laptop or desktop computers! For installation and configuration help please see the <a href="https://github.com/caboodle-tech/pdf.js-mini-viewers" target="_blank">PDF.js Mini Viewers (PMV) GitHub repository</a>. PMV is an open source community supported project, if you would like to help please consider <a href="https://github.com/caboodle-tech/pdf.js-mini-viewers/issues" target="_blank">tackling an issue</a> or <a href="https://ko-fi.com/caboodletech" target="_blank">making a donation</a> to keep the project alive.
         </p>
+        PMV: <img src="badges/version.svg" alt="v1.0.0"> <img src="badges/license.svg">
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        PDFJS: <img src="badges/pdfjs-license.svg">
     </div>
     <div data-pdf="pdfs/demo.pdf"></div>
     <div data-pdf="pdfs/irs-1040.pdf"></div>
-    <div data-pdf="pdfs/pdfjs-example.pdf"></div>
     <script>
         /**
          * Here is one example of initializing PDFMiniViewers. In a production
