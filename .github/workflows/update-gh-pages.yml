@@ -21,12 +21,12 @@ jobs:
       - uses: actions/checkout@v2 # Checkout the main branch
       - name: Stash website files
         run: |
-          mv badges/ ../badges
-          mv css/ ../css
-          mv js/ ../js
-          mv pdfs/ ../pdfs
-          mv index.html ../index.html
-          mv LICENSE ../LICENSE
+          mv badges/ ../stash/badges
+          mv css/ ../stash/css
+          mv js/ ../stash/js
+          mv pdfs/ ../stash/pdfs
+          mv index.html ../stash/index.html
+          mv LICENSE ../stash/LICENSE
           echo "Stashed files for website up 1 directory"
 
       # Create a shell script that creates the gh-pages branch if it does not exist
@@ -61,18 +61,8 @@ jobs:
           rm * -r
           git rm -r --cached .
           echo "Copy stashed files into gh-pages branch"
-          cp ../badges/* ./badges/ -r
-          cp ../css/* ./css/ -r
-          cp ../js/* ./js/ -r
-          cp ../pdfs/* ./pdfs/ -r
-          cp ../index.html .
-          cp ../LICENSE .
-          rm ../badges -r
-          rm ../css -r
-          rm ../js -r
-          rm ../pdfs -r
-          rm ../index.html
-          rm ../LICENSE
+          cp ../stash/* . -r
+          rm ../stash -r
           git add .
           git commit -m "workflow auto compile gh-pages"
           git push
