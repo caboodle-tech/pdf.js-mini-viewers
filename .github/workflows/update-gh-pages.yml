@@ -18,6 +18,7 @@ jobs:
 
     steps:
       # Stash files we want to keep for the gh-pages site.
+      - uses: actions/checkout@v2 # Checkout the main branch
       - name: Stash website files
         run: |
           mv badges/ ../badges
