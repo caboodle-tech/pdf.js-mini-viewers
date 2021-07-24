@@ -61,10 +61,10 @@ jobs:
           rm * -r
           git rm -r --cached .
           echo "Copy stashed files into gh-pages branch"
-          cp ../badges/* . -r
-          cp ../css/* . -r
-          cp ../js/* . -r
-          cp ../pdfs/* . -r
+          cp ../badges/* ./badges/ -r
+          cp ../css/* ./css/ -r
+          cp ../js/* ./js/ -r
+          cp ../pdfs/* ./pdfs/ -r
           cp ../index.html .
           cp ../LICENSE .
           rm ../badges -r
