@@ -30,6 +30,36 @@ var PDFMiniViewers = ( function() {
     var PDFS = {};
     var THROTTLE_FUNC = {};
     var THROTTLE_TIMER = {};
+
+    var absoluteUrl = function(uri) {
+        if (uri.substring(0, 4) === 'http') {
+            return uri;
+        }
+        const relative = relativePathToAbsolute(uri);
+        if (relative[relative.length - 1] === '/') {
+            return window.location.origin + relative;
+        }
+        const last = relative.substring(relative.lastIndexOf('/'));
+        // https://stackoverflow.com/a/12900504/3193156
+        const file = last.slice((last.lastIndexOf(".") - 1 >>> 0) + 2);
+        if (file.length > 0) {
+            return window.location.origin + relative;
+        }
+        if (relative[relative.length - 1] !== '/') {
+            return window.location.origin + relative + '/';
+        }
+        return window.location.origin + relative;
+    };
+
+    // https://stackoverflow.com/a/25833886/3193156
+    var relativePathToAbsolute = function(sRelPath) {
+        var nUpLn, sDir = "", sPath = location.pathname.replace(/[^\/]*$/, sRelPath.replace(/(\/|^)(?:\.?\/+)+/g, "$1"));
+        for (var nEnd, nStart = 0; nEnd = sPath.indexOf("/../", nStart), nEnd > -1; nStart = nEnd + nUpLn) {
+          nUpLn = /^\/(?:\.\.\/)*/.exec(sPath.slice(nEnd))[0].length;
+          sDir = (sDir + sPath.substring(nStart, nEnd)).replace(new RegExp("(?:\\\/+[^\\\/]*){0," + ((nUpLn - 1) / 3) + "}$"), "/");
+        }
+        return sDir + sPath.substr(nStart);
+    };
     
     /**
      * Add a callback function (observer) to PMV to notify when a PDF goes fullscreen.
@@ -56,10 +86,12 @@ var PDFMiniViewers = ( function() {
      * @param {Element} viewer The viewing area to convert into a PMV.
      */
     var convertPdfs = function( viewer ) {
+
+        let absUrl = absoluteUrl(viewer.dataset.pdf);
         
         // Asynchronous download PDF.
         var loadingTask = pdfjsLib.getDocument( {
-            url: viewer.dataset.pdf,
+            url: absUrl,
             cMapUrl: CMAPS,
             cMapPacked: true,
             enableXfa: true,
@@ -71,9 +103,24 @@ var PDFMiniViewers = ( function() {
             function( pdf ) {
 
                 // Store a global reference to this viewer.
-                var id = uid();
+                // var id = uid(); // TODO: Depreciate uid
+                var id = 'H' + hashCode(absoluteUrl(viewer.dataset.pdf))
+                pdf.src = absUrl;
+                pdf.srcHash = id;
                 PDFS[ id ] = pdf;
-                
+
+                // LOAD history (annotations) now so they are available as the pages are loaded.
+                const history = localStorage.getItem(id);
+                if (history) {
+                    const json = JSON.parse(history);
+                    Object.entries(json).forEach( (entry) => {
+                        // 0 = key
+                        // 1 = value (object)
+                        console.log(entry);
+                        pdf.annotationStorage.setValue(entry[0], entry[1]);
+                    });
+                }
+                        
                 // Make the PMV container for this PDF.
                 var container = document.createElement('DIV');
                 container.id = id;
@@ -928,6 +975,24 @@ var PDFMiniViewers = ( function() {
     };
 
     /**
+     * Returns a hash code from a string
+     * 
+     * @see http://werxltd.com/wp/2010/05/13/javascript-implementation-of-javas-string-hashcode-method/
+     * 
+     * @param  {String} str The string to hash.
+     * @returns {Number}    A 32bit integer.
+     */
+    var hashCode = function(str) {
+        let hash = 0;
+        for (let i = 0, len = str.length; i < len; i++) {
+            let chr = str.charCodeAt(i);
+            hash = (hash << 5) - hash + chr;
+            hash |= 0; // Convert to 32bit integer
+        }
+        return hash;
+    };
+
+    /**
      * Activate PDFMiniViewers.
      */
      var initialize = function( worker, cmaps, fonts ) {
@@ -936,8 +1001,8 @@ var PDFMiniViewers = ( function() {
             if ( pdfjsLib.getDocument ) {
                 // The workerSrc property must be specified.
                 pdfjsLib.GlobalWorkerOptions.workerSrc = worker;
-                CMAPS = cmaps;
-                FONTS = fonts;
+                CMAPS = absoluteUrl(cmaps);
+                FONTS = absoluteUrl(fonts);
                 HEIGHT = ( window.innerHeight * .70 ) + 'px';
                 // Search the page for all embedded PDFs and convert them to viewers.
                 var pdfs = document.querySelectorAll('[data-pdf]');
@@ -1190,6 +1255,7 @@ var PDFMiniViewers = ( function() {
      * @param {Annotation} annotationsData The annotation data for this page.
      */
     var renderAnnotationLayer = function( pdf, annotationLayer, viewport, annotationsData ) {
+        // console.log(annotationsData);
         var previousDest = '';
         var previousLeft = 0;
         var currentHash  = '';
@@ -1487,9 +1553,8 @@ var PDFMiniViewers = ( function() {
         }
         // Save to PDFJS's annotation storage.
         pdf.annotationStorage.setValue( this.id, { 'value': save } );
+        localStorage.setItem(viewer.dataset.id, JSON.stringify(pdf.annotationStorage.getAll()));
 
-        // TODO: Save on update. PLUS we need to change ID to a hash of some kind so we can match the storage back to the actual PDF.
-        pdf.annotationStorage.getAll();
     };
 
     return {
