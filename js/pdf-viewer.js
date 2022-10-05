@@ -8,6 +8,7 @@ var PDFMiniViewers = ( function() {
     var CMAPS;
     var DEBOUNCE_FUNCS = {};
     var DEBOUNCE_TIMER = {};
+    var FONTS;
     var FULLSCREEN_FUNC = {};
     var HEIGHT;
     var ICON = {
@@ -35,7 +36,7 @@ var PDFMiniViewers = ( function() {
      *
      * @param {Function} func The function to register as a fullscreen observer.
      */
-     var addFullscreenCallback = function( func ) {
+    var addFullscreenCallback = function( func ) {
         var hash = getStringHash( func.toString() );
         FULLSCREEN_FUNC[ hash ] = func;
     };
@@ -61,6 +62,8 @@ var PDFMiniViewers = ( function() {
             url: viewer.dataset.pdf,
             cMapUrl: CMAPS,
             cMapPacked: true,
+            enableXfa: true,
+            standardFontDataUrl: FONTS
         } );
 
         // Convert the viewing area into a PMV and display the PDF.
@@ -493,7 +496,7 @@ var PDFMiniViewers = ( function() {
                 // Advanced elements like forms.
                 return getWidgetHTML( pdf, data, viewport );
             default:
-                console.warn('Unsupported annotation type. Support might be added from: https://github.com/mozilla/pdf.js/blob/2a7827a7c67375a239284f9d37986a2941e51dba/test/unit/annotation_spec.js');
+                console.warn('Unsupported annotation type. Support might be added from: https://github.com/mozilla/pdf.js/blob/master/test/unit/annotation_spec.js');
                 return [ document.createElement('SPAN'), '' ];
         }
     };
@@ -605,6 +608,15 @@ var PDFMiniViewers = ( function() {
         // Send back toolbar.
         return div;
     };
+
+    /**
+     * Gives you access to all the PDFDocumentProxy's on the current page.
+     * 
+     * @returns {Object} The PDFDocumentProxy objects on the current page.
+     */
+    var getPdfs = function() {
+        return PDFS;
+    }
     
     /**
      * Build the HTML for this viewers resize toolbar.
@@ -710,7 +722,7 @@ var PDFMiniViewers = ( function() {
      * @return {HTML} This PDFs advanced widget compiled to HTML.
      */
     var getWidgetHTML = function( pdf, data, viewport ) {
-        var elem, type = '', value = pdf.annotationStorage.getValue( data.id );
+        var elem, type = '', value = pdf.annotationStorage.getValue( data.id, '' );
         if ( value ) {
             // Unpack value.
             value = value.value;
@@ -813,13 +825,15 @@ var PDFMiniViewers = ( function() {
                     }
                 }
                 elem.id = data.id;
-                elem.setAttribute( 'maxlength', data.maxLen );
+                if (data.maxLen > 0) {
+                    elem.setAttribute( 'maxlength', data.maxLen );
+                }
                 elem.addEventListener( 'input', updateAnnotationStorage );
                 type = 'textWidgetAnnotation';
                 break;
             default:
                 elem = document.createElement('SPAN');
-                console.warn('Unsupported widget type. Support might be added from: https://github.com/mozilla/pdf.js/blob/2a7827a7c67375a239284f9d37986a2941e51dba/test/unit/annotation_spec.js');
+                console.warn('Unsupported widget type. Support might be added from: https://github.com/mozilla/pdf.js/blob/master/test/unit/annotation_spec.js');
         }
         if ( data.readOnly ) {
             elem.setAttribute( 'disabled', '' );
@@ -900,7 +914,7 @@ var PDFMiniViewers = ( function() {
 
     /**
      * When the users browser widow resizes we need to redraw (reload) all the
-     * PDF pages to the new available size. This function will call each PDF
+     * PDF pages to the new available size. This function will call each page
      * one by one and update them.
      */
     var handleWindowResize = function() {
@@ -916,12 +930,14 @@ var PDFMiniViewers = ( function() {
     /**
      * Activate PDFMiniViewers.
      */
-     var initialize = function( worker, cmaps ) {
+     var initialize = function( worker, cmaps, fonts ) {
+        // TODO: fonts has an issue where its relative to the worker NOT the HTML page that loaded it
         if ( worker && cmaps ) {
             if ( pdfjsLib.getDocument ) {
                 // The workerSrc property must be specified.
                 pdfjsLib.GlobalWorkerOptions.workerSrc = worker;
                 CMAPS = cmaps;
+                FONTS = fonts;
                 HEIGHT = ( window.innerHeight * .70 ) + 'px';
                 // Search the page for all embedded PDFs and convert them to viewers.
                 var pdfs = document.querySelectorAll('[data-pdf]');
@@ -937,7 +953,7 @@ var PDFMiniViewers = ( function() {
                 console.log('You must load PDF.js before you initialize PDFMiniViewers.');
             }
         } else {
-            console.log('You must initialize PDFMiniViewers with the location of the [pdf.worker.js] file and the path to the [cmaps] folder.');
+            console.log('You must initialize PDFMiniViewers with the location of the [pdf.worker.js] file, the path to the [cmaps] folder, and the path to the [standard_fonts].');
         }
     };
 
@@ -1019,7 +1035,8 @@ var PDFMiniViewers = ( function() {
         var renderContext = {
             canvasContext: canvas.getContext('2d'),
             viewport: viewport,
-            renderInteractiveForms: true
+            // renderInteractiveForms: true
+            annotationsMode: pdfjsLib.AnnotationMode.ENABLE_STORAGE
         };
         PDFPageProxy.render( renderContext );
 
@@ -1130,7 +1147,8 @@ var PDFMiniViewers = ( function() {
         var renderContext = {
             canvasContext: newCanvas.getContext('2d'),
             viewport: viewport,
-            renderInteractiveForms: true
+            // renderInteractiveForms: true,
+            annotationsMode: pdfjsLib.AnnotationMode.ENABLE_STORAGE
         };
         PDFPageProxy.render( renderContext );
 
@@ -1285,8 +1303,8 @@ var PDFMiniViewers = ( function() {
             viewport: viewport,
             textDivs: [],
             textContentItemsStr: [],
-            timeout: 0,
-            enhanceTextSelection: true
+            timeout: 0
+            // enhanceTextSelection: true // Depreciated
         } );
     };
     
@@ -1469,11 +1487,14 @@ var PDFMiniViewers = ( function() {
         }
         // Save to PDFJS's annotation storage.
         pdf.annotationStorage.setValue( this.id, { 'value': save } );
-        // pdf.annotationStorage.resetModified();
+
+        // TODO: Save on update. PLUS we need to change ID to a hash of some kind so we can match the storage back to the actual PDF.
+        pdf.annotationStorage.getAll();
     };
 
     return {
         'addFullscreenCallback': addFullscreenCallback,
+        getPdfs,
         'initialize': initialize,
         'removeFullscreenCallback': removeFullscreenCallback
     };
