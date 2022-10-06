@@ -74360,7 +74360,7 @@ class XRef {
         const startXRef = this.startXRefQueue[0];
 
         if (startXRefParsedCache.has(startXRef)) {
-          (0, _util.warn)("readXRef - skipping XRef table since it was already parsed.");
+          // (0, _util.warn)("readXRef - skipping XRef table since it was already parsed.");
           this.startXRefQueue.shift();
           continue;
         }
