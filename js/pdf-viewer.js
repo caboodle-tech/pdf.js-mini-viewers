@@ -18,6 +18,7 @@ var PDFMiniViewers = ( function() {
         compress: '<svg class="pdf-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M15 2h2v5h7v2h-9v-7zm9 13v2h-7v5h-2v-7h9zm-15 7h-2v-5h-7v-2h9v7zm-9-13v-2h7v-5h2v7h-9z"/></svg>',
         down: '<svg class="pdf-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M12 24l-8-9h6v-15h4v15h6z"/></svg>',
         download: '<svg class="pdf-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M12 21l-8-9h6v-12h4v12h6l-8 9zm9-1v2h-18v-2h-2v4h22v-4h-2z"/></svg>',
+        erase: '<svg class="pdf-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M5.662 23l-5.369-5.365c-.195-.195-.293-.45-.293-.707 0-.256.098-.512.293-.707l14.929-14.928c.195-.194.451-.293.707-.293.255 0 .512.099.707.293l7.071 7.073c.196.195.293.451.293.708 0 .256-.097.511-.293.707l-11.216 11.219h5.514v2h-12.343zm3.657-2l-5.486-5.486-1.419 1.414 4.076 4.072h2.829zm6.605-17.581l-10.677 10.68 5.658 5.659 10.676-10.682-5.657-5.657z"/></svg>',
         expand: '<svg class="pdf-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M24 9h-2v-5h-7v-2h9v7zm-9 13v-2h7v-5h2v7h-9zm-15-7h2v5h7v2h-9v-7zm9-13v2h-7v5h-2v-7h9z"/></svg>',
         fullscreen: '<svg class="pdf-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M24 10.999v-10.999h-11l3.379 3.379-13.001 13-3.378-3.378v10.999h11l-3.379-3.379 13.001-13z"/></svg>',
         minus: '<svg class="pdf-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M0 10h24v4h-24z"/></svg>',
@@ -103,7 +104,6 @@ var PDFMiniViewers = ( function() {
             function( pdf ) {
 
                 // Store a global reference to this viewer.
-                // var id = uid(); // TODO: Depreciate uid
                 var id = 'H' + hashCode(absoluteUrl(viewer.dataset.pdf))
                 pdf.src = absUrl;
                 pdf.srcHash = id;
@@ -116,10 +116,17 @@ var PDFMiniViewers = ( function() {
                     Object.entries(json).forEach( (entry) => {
                         // 0 = key
                         // 1 = value (object)
-                        console.log(entry);
                         pdf.annotationStorage.setValue(entry[0], entry[1]);
                     });
                 }
+
+                // Destroy PDF history when a reset button is pressed.
+                pdf.annotationStorage.onResetModified = function(){
+                    localStorage.removeItem(pdf.srcHash);
+                    this._storage = new Map(); // This is a hack!?
+                    // TODO: How to properly handle this? Annotations does not provided a better way.
+                    rerenderPDF(pdf.srcHash);
+                };
                         
                 // Make the PMV container for this PDF.
                 var container = document.createElement('DIV');
@@ -138,9 +145,11 @@ var PDFMiniViewers = ( function() {
 
                 // Add the controls for this PMW container.
                 var mainToolbar   = getMainToolbarHTML( pdf.numPages, viewer.dataset.options );
+                var resetFormToolbar = getResetFormHTML();
                 var resizeToolbar = getResizeToolbarHTML();
                 container.appendChild( mainToolbar );
                 container.appendChild( viewer );
+                container.appendChild( resetFormToolbar );
                 container.appendChild( resizeToolbar );
 
                 // Record any padding the user may have added.
@@ -169,6 +178,18 @@ var PDFMiniViewers = ( function() {
                         }
                     );
                 }
+
+                // Only display the reset form button if there is a form in the PDF.
+                setTimeout(() => {
+                    if( viewer.querySelector('input[type="text"]')
+                        || viewer.querySelector('input[type="checkbox"]')
+                        || viewer.querySelector('input[type="radio"]')
+                        || viewer.querySelector('textarea')
+                        || viewer.querySelector('select')
+                    ) {
+                        resetFormToolbar.classList.add('has-form');
+                    }
+                }, 1500);
             },
             function( error ) {
                 console.error( error );
@@ -261,7 +282,7 @@ var PDFMiniViewers = ( function() {
         if ( filename.indexOf('/') > -1 ) {
             filename = filename.substr( filename.lastIndexOf('/') + 1 );
         }
-        return filename;
+        return filename.trim().replace(/ /g, '-');
     };
 
     /**
@@ -319,6 +340,22 @@ var PDFMiniViewers = ( function() {
             toolbar.classList.remove('no-page-down');
         }
     };
+
+    var eventFormReset = function(evt) {
+        const viewer = evt.target.closest('.pdf-mini-viewer');
+        if (viewer) {
+            const pdf = PDFS[ viewer.id ];
+            if (pdf) {
+                if (confirm('Are you sure you want to reset the forms in this PDF? Any information you entered will be lost.') === false) {
+                    return;
+                }
+                // Trick the PDF into modified mode.
+                pdf.annotationStorage.setValue('__NULL__', {value: null});
+                // Now reset it.
+                pdf.annotationStorage.resetModified();
+            }
+        }
+    }
 
     /**
      * Respond to the page down arrow being pressed.
@@ -581,6 +618,19 @@ var PDFMiniViewers = ( function() {
         return style;
     };
 
+    var getResetFormHTML = function() {
+        // Resize toolbar.
+        var div = document.createElement('DIV');
+        div.classList.add('pdf-reset-form-toolbar');
+        // Reset.
+        var elem = document.createElement('DIV');
+        elem.classList.add('reset-form', 'button');
+        elem.innerHTML = ICON.erase;
+        elem.addEventListener( 'click', eventFormReset );
+        div.appendChild( elem );
+        return div;
+    }
+
     /**
      * Build the HTMlf or this viewers main toolbar.
      *
@@ -786,6 +836,12 @@ var PDFMiniViewers = ( function() {
                     } else {
                         elem.setAttribute( 'value', data.fieldName );
                     }
+                    // If this is a reset button hook it up.
+                    if (data.resetForm) {
+                        elem.addEventListener('click', () => {
+                            pdf.annotationStorage.resetModified();
+                        });
+                    }
                 } else {
                     if ( data.checkBox ) {
                         elem.setAttribute( 'type', 'checkbox' );
@@ -865,7 +921,6 @@ var PDFMiniViewers = ( function() {
                         elem.classList.add('comb');
                     }
                     if ( value ) {
-                        console.log( value );
                         elem.setAttribute( 'value', value );
                     } else {
                         elem.setAttribute( 'value', data.fieldValue );
@@ -1005,11 +1060,11 @@ var PDFMiniViewers = ( function() {
                 FONTS = absoluteUrl(fonts);
                 HEIGHT = ( window.innerHeight * .70 ) + 'px';
                 // Search the page for all embedded PDFs and convert them to viewers.
-                var pdfs = document.querySelectorAll('[data-pdf]');
-                pdfs.forEach( function( pdf ) {
+                var viewers = document.querySelectorAll('[data-pdf]');
+                viewers.forEach( function( view ) {
                     // Do not convert a viewer that has already been done.
-                    if ( ! pdf.dataset.id ) {
-                        convertPdfs( pdf );
+                    if ( ! view.dataset.id ) {
+                        convertPdfs( view );
                     }
                 } );
                 // Attach window resize listener.
@@ -1100,7 +1155,6 @@ var PDFMiniViewers = ( function() {
         var renderContext = {
             canvasContext: canvas.getContext('2d'),
             viewport: viewport,
-            // renderInteractiveForms: true
             annotationsMode: pdfjsLib.AnnotationMode.ENABLE_STORAGE
         };
         PDFPageProxy.render( renderContext );
@@ -1255,7 +1309,6 @@ var PDFMiniViewers = ( function() {
      * @param {Annotation} annotationsData The annotation data for this page.
      */
     var renderAnnotationLayer = function( pdf, annotationLayer, viewport, annotationsData ) {
-        // console.log(annotationsData);
         var previousDest = '';
         var previousLeft = 0;
         var currentHash  = '';
@@ -1375,7 +1428,7 @@ var PDFMiniViewers = ( function() {
     };
     
     /**
-     * Re-render an existing PDF starting for the current page outward to
+     * Re-render an existing PDF starting from the current page outward to
      * minimize the visual loading effect the user sees.
      *
      * @param {String} id The id of the PDF to operate on.
@@ -1474,16 +1527,6 @@ var PDFMiniViewers = ( function() {
                 }
             }
         }
-    };
-    
-    /**
-     * Generate a fairly unique ID for use as an HTML ID.
-     * {@link https://gist.github.com/gordonbrander/2230317#gistcomment-1713405|Source}.
-     * 
-     * @return {String} A 14 character unique ID.
-     */
-    var uid = function() {
-        return ( Date.now().toString(36) + Math.random().toString(36).substr(2, 6) ).toUpperCase();
     };
 
     /**

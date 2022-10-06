@@ -782,6 +782,41 @@
 .pdf-mini-viewer .pdf-viewer .page .annotation-layer section.textWidgetAnnotation .comb {
   padding-left: 5px;
 }
+.pdf-mini-viewer .pdf-reset-form-toolbar {
+  display: none;
+  position: absolute;
+  bottom: 50px;
+  left: 15px;
+  height: initial;
+  width: 55px;
+  background-color: initial;
+  pointer-events: none;
+}
+.pdf-mini-viewer .pdf-reset-form-toolbar .button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #f1f1f1;
+  border-radius: 50%;
+  width: 35px;
+  height: 35px;
+  line-height: 35px;
+  margin-bottom: 15px;
+  pointer-events: auto;
+  -webkit-box-shadow: 0px 2px 5px 0px rgba(0, 0, 0, 0.3);
+  -moz-box-shadow: 0px 2px 5px 0px rgba(0, 0, 0, 0.3);
+  box-shadow: 0px 2px 5px 0px rgba(0, 0, 0, 0.3);
+}
+.pdf-mini-viewer .pdf-reset-form-toolbar .button .pdf-icon,
+.pdf-mini-viewer .pdf-reset-form-toolbar .button svg.pdf-icon {
+  fill: #525659;
+  color: #525659;
+  width: 16px;
+  height: 16px;
+}
+.pdf-mini-viewer .pdf-reset-form-toolbar.has-form {
+  display: block;
+}
 .pdf-mini-viewer .pdf-resize-toolbar {
   display: flex;
   flex-direction: row;
@@ -924,6 +959,14 @@
     width: 40px;
     cursor: pointer;
   }
+  .pdf-mini-viewer .pdf-reset-form-toolbar {
+    bottom: 15px;
+  }
+  .pdf-mini-viewer .pdf-reset-form-toolbar .reset-form {
+    flex: 1;
+    text-align: center;
+    cursor: pointer;
+  }
   .pdf-mini-viewer .pdf-resize-toolbar {
     display: block;
     position: absolute;
@@ -985,6 +1028,9 @@
   }
 }
 @media (min-width: 1024px) {
+  .pdf-mini-viewer .pdf-reset-form-toolbar {
+    width: 65px;
+  }
   .pdf-mini-viewer .pdf-resize-toolbar {
     display: block;
     position: absolute;

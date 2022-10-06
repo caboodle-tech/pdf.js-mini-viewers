@@ -227,6 +227,42 @@
         }
     }
 
+    .pdf-reset-form-toolbar {
+        display: none;
+        position: absolute;
+        bottom: 50px;
+        left: 15px;
+        height: initial;
+        width: 55px;
+        background-color: initial;
+        pointer-events: none;
+
+        .button {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: @toolbar-icon;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            line-height: 35px;
+            margin-bottom: 15px;
+            pointer-events: auto;
+            .drop-shadow();
+
+            .pdf-icon, svg.pdf-icon {
+                fill: @viewer-bg;
+                color: @viewer-bg;
+                width: 16px;
+                height: 16px;
+            }
+        }
+
+        &.has-form {
+            display: block;
+        }
+    }
+
     .pdf-resize-toolbar {
         display: flex;
         flex-direction: row;
@@ -409,6 +445,16 @@
             }
         }
 
+        .pdf-reset-form-toolbar {
+            bottom: 15px;
+
+            .reset-form {
+                flex: 1;
+                text-align: center;
+                cursor: pointer;
+            }
+        }
+
         .pdf-resize-toolbar {
             display: block;
             position: absolute;
@@ -478,6 +524,10 @@
     }
 
     @media ( min-width: 1024px ) {
+        .pdf-reset-form-toolbar {
+            width: 65px;
+        }
+
         .pdf-resize-toolbar {
             display: block;
             position: absolute;
