@@ -6,8 +6,6 @@ var PDFMiniViewers = ( function() {
      * PDFMiniViewers global variables.
      */
     var CMAPS;
-    var DEBOUNCE_FUNCS = {};
-    var DEBOUNCE_TIMER = {};
     var FONTS;
     var FULLSCREEN_FUNC = {};
     var HEIGHT;
@@ -29,8 +27,6 @@ var PDFMiniViewers = ( function() {
         up: '<svg class="pdf-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M12 0l8 9h-6v15h-4v-15h-6z"/></svg>'
     };
     var PDFS = {};
-    var THROTTLE_FUNC = {};
-    var THROTTLE_TIMER = {};
 
     var absoluteUrl = function(uri) {
         if (uri.substring(0, 4) === 'http') {
@@ -140,7 +136,7 @@ var PDFMiniViewers = ( function() {
                 viewer.dataset.zoom = '0.00';
                 viewer.classList.add('pdf-viewer');
                 viewer.style.height = HEIGHT;
-                viewer.addEventListener( 'scroll', debounce( updateCurrentPage, 100 ), true );
+                viewer.addEventListener( 'scroll', debounce( updateCurrentPage, 500 ), true );
                 viewer.addEventListener( 'click', goToBookmark, false );
 
                 // Add the controls for this PMW container.
@@ -205,31 +201,22 @@ var PDFMiniViewers = ( function() {
      * @param {int} delay How much time in milliseconds must pass before the function will run.
      * @return {Function} An anonymous function that calls the request function.
      */
-    var debounce = function( func, delay ) {
-        delay = delay || 250;
-        var hash = 'F' + getStringHash( func.toString() );
-        if ( ! DEBOUNCE_FUNCS[ hash ] ) {
-            DEBOUNCE_FUNCS[ hash ] = [ func, event ];
-            return function() {
-                DEBOUNCE_FUNCS[ hash ][1] = event;
-                if ( DEBOUNCE_TIMER[ hash ] ) {
-                    clearTimeout( DEBOUNCE_TIMER[ hash ] );
-                }
-                DEBOUNCE_TIMER[ hash ] = setTimeout( doDebounce.bind( null, hash ), delay );
-            }
+    const debounce = (callback, wait, context) => {
+        if (!Number.isInteger(wait)) {
+            wait = 100;
         }
-    };
-
-    /**
-     * Run a debounced function.
-     *
-     * @param {String} hash The debounce function to check for and run; if it
-     *                      does not exist it has been run already.
-     */
-    var doDebounce = function( hash ) {
-        if ( DEBOUNCE_FUNCS[ hash ] ) {
-            DEBOUNCE_FUNCS[ hash ][0].call( null, DEBOUNCE_FUNCS[ hash ][1] );
+        if (wait < 100) {
+            wait = 100;
         }
+        let timeoutId = null;
+        return (...args) => {
+            const _context = context || this;
+            window.clearTimeout(timeoutId);
+            timeoutId = window.setTimeout(() => {
+                console.log('Debounce');
+                callback.apply(_context, args);
+            }, wait);
+        };
     };
 
     /**
@@ -872,7 +859,7 @@ var PDFMiniViewers = ( function() {
                             elem.setAttribute( 'value', data.buttonValue );
                         }
                     }
-                    elem.addEventListener( 'change', updateAnnotationStorage );
+                    elem.addEventListener( 'change', debounce( updateAnnotationStorage, 1000, elem ) );
                 }
                 break;
             // Select and Multi-select.
@@ -902,7 +889,7 @@ var PDFMiniViewers = ( function() {
                     options += '>' + data.options[i].displayValue + '</option>';
                 }
                 elem.innerHTML = options;
-                elem.addEventListener( 'change', updateAnnotationStorage );
+                elem.addEventListener( 'change', debounce( updateAnnotationStorage, 1000, elem ) );
                 type = 'choiceWidgetAnnotation';
                 break;
             // Input and Textarea.
@@ -930,7 +917,7 @@ var PDFMiniViewers = ( function() {
                 if (data.maxLen > 0) {
                     elem.setAttribute( 'maxlength', data.maxLen );
                 }
-                elem.addEventListener( 'input', updateAnnotationStorage );
+                elem.addEventListener( 'input', debounce( updateAnnotationStorage, 1000, elem ) );
                 type = 'textWidgetAnnotation';
                 break;
             default:
@@ -1020,6 +1007,7 @@ var PDFMiniViewers = ( function() {
      * one by one and update them.
      */
     var handleWindowResize = function() {
+        visibleConsoleLog(`Resize W:${document.body.clientWidth} H:${document.body.clientHeight}`);
         for ( var prop in PDFS ) {
             var viewer = document.querySelector('.pdf-viewer[data-id="' + prop + '"]');
             viewer.dataset.zoom = '0.00';
@@ -1068,7 +1056,7 @@ var PDFMiniViewers = ( function() {
                     }
                 } );
                 // Attach window resize listener.
-                window.addEventListener( 'resize', debounce( handleWindowResize ), true );
+                window.addEventListener( 'resize', debounce( handleWindowResize, 500 ), true );
             } else {
                 console.log('You must load PDF.js before you initialize PDFMiniViewers.');
             }
@@ -1196,6 +1184,8 @@ var PDFMiniViewers = ( function() {
      * @param {PDFPageProxy} PDFPageProxy The page data for this specific page of the PDF.
      */
     var reloadPage = function( viewer, PDFPageProxy ) {
+
+        visibleConsoleLog('Reloading Page');
 
         // Grab the PDFDocumentProxy object for this PDF.
         var pdf = PDFS[ viewer.dataset.id ];
@@ -1487,28 +1477,24 @@ var PDFMiniViewers = ( function() {
      * Throttle a function call to insure that it can only run
      * once during a set period of time.
      */
-    var throttle = function( func, delay ) {
-        delay = delay || 250;
-        var hash = 'F' + getStringHash( func.toString() );
-        if ( ! THROTTLE_FUNC[ hash ] ) {
-            THROTTLE_FUNC[ hash ] = [ func, delay, Date.now(), event ];
-            return function() {
-                throttle( func, delay );
-                THROTTLE_FUNC[ hash ][3] = event;
-                if ( THROTTLE_TIMER[ hash ] ) {
-                    clearTimeout( THROTTLE_TIMER[ hash ] );
-                }
-                THROTTLE_TIMER[ hash ] = setTimeout( throttle.bind( null, func, delay ), delay );
+    var throttle = (callback, limit, context) => {
+        let lastFunc;
+        let lastRan;
+        return (...args) => {
+            const _context = context || this;
+            if (!lastRan) {
+                callback.apply(_context, args);
+                lastRan = Date.now();
+            } else {
+                clearTimeout(lastFunc);
+                lastFunc = setTimeout(() => {
+                    if ((Date.now() - lastRan) >= limit) {
+                        callback.apply(_context, args);
+                        lastRan = Date.now();
+                    }
+                }, limit - (Date.now() - lastRan));
             }
-        } else {
-            if ( Date.now() > THROTTLE_FUNC[ hash ][1] + THROTTLE_FUNC[ hash ][2] ) {
-                if ( THROTTLE_FUNC[ hash ][3].type == 'message' ) {
-                    THROTTLE_FUNC[ hash ][3] = event;
-                }
-                THROTTLE_FUNC[ hash ][0].call( null, THROTTLE_FUNC[ hash ][3] );
-                THROTTLE_FUNC[ hash ][2] = Date.now();
-            }
-        }
+        };
     };
 
     /**
@@ -1537,6 +1523,7 @@ var PDFMiniViewers = ( function() {
      * between page reloads using local storage.
      */
     var updateAnnotationStorage = function() {
+        console.log(this);
         var viewer = this.closest('.pdf-viewer');
         var pdf    = PDFS[ viewer.dataset.id ];
         var save   = '';
@@ -1595,9 +1582,17 @@ var PDFMiniViewers = ( function() {
                 break;
         }
         // Save to PDFJS's annotation storage.
+        console.log('SAVE AN');
         pdf.annotationStorage.setValue( this.id, { 'value': save } );
         localStorage.setItem(viewer.dataset.id, JSON.stringify(pdf.annotationStorage.getAll()));
 
+    };
+
+    var visibleConsoleLog = function(msg) {
+        const con = document.getElementById('console');
+        const line = parseInt(con.dataset.line) + 1;
+        con.dataset.line = line;
+        con.innerHTML = `${line} ${msg}<br>${con.innerHTML}`;
     };
 
     return {
