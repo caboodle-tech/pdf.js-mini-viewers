@@ -1,0 +1,9 @@
+@use "sass:color";
+
+@mixin drop-shadow( $lengths: 0px 2px 5px 0px, $color: #000000, $opacity: 0.3 ) {
+    $rgba: color.change($color, $alpha: $opacity);
+    // -webkit-box-shadow: $lengths rgba( $rgb, $opacity );
+    -webkit-box-shadow: $lengths $rgba;
+    -moz-box-shadow: $lengths $rgba;
+    box-shadow: $lengths $rgba;
+}

@@ -18,12 +18,10 @@
   background-color: #323639;
   color: #f1f1f1;
 }
-.pdf-mini-viewer .pdf-main-toolbar .pdf-icon,
-.pdf-mini-viewer .pdf-main-toolbar svg.pdf-icon {
+.pdf-mini-viewer .pdf-main-toolbar .pdf-icon, .pdf-mini-viewer .pdf-main-toolbar svg.pdf-icon {
   fill: #f1f1f1;
 }
-.pdf-mini-viewer .pdf-main-toolbar .pdf-icon:hover,
-.pdf-mini-viewer .pdf-main-toolbar svg.pdf-icon:hover {
+.pdf-mini-viewer .pdf-main-toolbar .pdf-icon:hover, .pdf-mini-viewer .pdf-main-toolbar svg.pdf-icon:hover {
   cursor: pointer;
 }
 .pdf-mini-viewer .pdf-main-toolbar .page-up {
@@ -51,8 +49,7 @@
   font-size: 15px;
   color: #f1f1f1;
 }
-.pdf-mini-viewer .pdf-main-toolbar .page-wrapper .current-page::-webkit-outer-spin-button,
-.pdf-mini-viewer .pdf-main-toolbar .page-wrapper .current-page::-webkit-inner-spin-button {
+.pdf-mini-viewer .pdf-main-toolbar .page-wrapper .current-page::-webkit-outer-adjust-hue-button, .pdf-mini-viewer .pdf-main-toolbar .page-wrapper .current-page::-webkit-inner-adjust-hue-button {
   -webkit-appearance: none;
   margin: 0;
 }
@@ -88,9 +85,7 @@
   margin-right: 15px;
   cursor: pointer;
 }
-.pdf-mini-viewer .pdf-main-toolbar.single-page .page-up,
-.pdf-mini-viewer .pdf-main-toolbar.single-page .page-down,
-.pdf-mini-viewer .pdf-main-toolbar.single-page .page-wrapper {
+.pdf-mini-viewer .pdf-main-toolbar.single-page .page-up, .pdf-mini-viewer .pdf-main-toolbar.single-page .page-down, .pdf-mini-viewer .pdf-main-toolbar.single-page .page-wrapper {
   pointer-events: none;
   opacity: 0;
 }
@@ -124,35 +119,40 @@
   overflow: visible;
   background-color: #ffffff;
   -webkit-box-shadow: 0px 1px 3px 3px rgba(0, 0, 0, 0.2);
+  -moz-box-shadow: 0px 1px 3px 3px rgba(0, 0, 0, 0.2);
   box-shadow: 0px 1px 3px 3px rgba(0, 0, 0, 0.2);
   /* Copyright 2014 Mozilla Foundation
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+   *
+   * Licensed under the Apache License, Version 2.0 (the "License");
+   * you may not use this file except in compliance with the License.
+   * You may obtain a copy of the License at
+   *
+   *     http://www.apache.org/licenses/LICENSE-2.0
+   *
+   * Unless required by applicable law or agreed to in writing, software
+   * distributed under the License is distributed on an "AS IS" BASIS,
+   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   * See the License for the specific language governing permissions and
+   * limitations under the License.
+   */
   /* Copyright 2021 Mozilla Foundation
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+   *
+   * Licensed under the Apache License, Version 2.0 (the "License");
+   * you may not use this file except in compliance with the License.
+   * You may obtain a copy of the License at
+   *
+   *     http://www.apache.org/licenses/LICENSE-2.0
+   *
+   * Unless required by applicable law or agreed to in writing, software
+   * distributed under the License is distributed on an "AS IS" BASIS,
+   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   * See the License for the specific language governing permissions and
+   * limitations under the License.
+   */
+  /*
+  PDFJS styles rules starting from the .loadingIcon rule have been omitted since
+  PMV does not use their viewer.
+  */
 }
 .pdf-mini-viewer .pdf-viewer .page .text-layer {
   position: absolute;
@@ -538,11 +538,11 @@
   width: 100%;
   height: 100%;
 }
-.pdf-mini-viewer .pdf-viewer .page .xfaLabel > input[type="checkbox"] {
+.pdf-mini-viewer .pdf-viewer .page .xfaLabel > input[type=checkbox] {
   position: absolute;
   left: -99999px;
 }
-.pdf-mini-viewer .pdf-viewer .page .xfaLabel > input[type="checkbox"]:focus .xfaCheckboxMark {
+.pdf-mini-viewer .pdf-viewer .page .xfaLabel > input[type=checkbox]:focus .xfaCheckboxMark {
   box-shadow: 0 0 5px rgba(0, 0, 0, 0.7);
 }
 .pdf-mini-viewer .pdf-viewer .page .xfaCaption {
@@ -644,103 +644,16 @@
 .pdf-mini-viewer .pdf-viewer .page canvas[hidden] {
   display: none;
 }
-.pdf-mini-viewer .pdf-viewer .page .loadingIcon {
-  position: absolute;
-  display: block;
-  left: 0;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  background: url("../assets/loading-icon.gif") center no-repeat;
-}
-.pdf-mini-viewer .pdf-viewer .page .removePageBorders {
-  margin-left: 0;
-  margin-right: 0;
-}
-.pdf-mini-viewer .pdf-viewer .page .removePageBorders .page {
-  margin: 0 auto 10px;
-  border: none;
-}
-.pdf-mini-viewer .pdf-viewer .page .removePageBorders .spread .page {
-  margin-left: 5px;
-  margin-right: 5px;
-}
-.pdf-mini-viewer .pdf-viewer .page .singlePageView {
-  display: inline-block;
-}
-.pdf-mini-viewer .pdf-viewer .page .singlePageView .page {
-  margin: 0;
-  border: none;
-}
-.pdf-mini-viewer .pdf-viewer .page .scrollHorizontal {
-  margin-left: 3.5px;
-  margin-right: 3.5px;
-  text-align: center;
-  white-space: nowrap;
-}
-.pdf-mini-viewer .pdf-viewer .page .scrollHorizontal .spread {
-  margin-left: 0;
-  margin-right: 0;
-  display: inline-block;
-  vertical-align: middle;
-}
-.pdf-mini-viewer .pdf-viewer .page .scrollHorizontal .page {
-  display: inline-block;
-  vertical-align: middle;
-  margin-left: -3.5px;
-  margin-right: -3.5px;
-}
-.pdf-mini-viewer .pdf-viewer .page .scrollWrapped {
-  margin-left: 3.5px;
-  margin-right: 3.5px;
-  text-align: center;
-}
-.pdf-mini-viewer .pdf-viewer .page .scrollWrapped .spread {
-  margin-left: 0;
-  margin-right: 0;
-  display: inline-block;
-  vertical-align: middle;
-}
-.pdf-mini-viewer .pdf-viewer .page .scrollWrapped .page {
-  display: inline-block;
-  vertical-align: middle;
-  margin-left: -3.5px;
-  margin-right: -3.5px;
-}
-.pdf-mini-viewer .pdf-viewer .page .spread {
-  margin-left: 3.5px;
-  margin-right: 3.5px;
-  text-align: center;
-  white-space: nowrap;
-}
-.pdf-mini-viewer .pdf-viewer .page .spread .page {
-  display: inline-block;
-  vertical-align: middle;
-  margin-left: -3.5px;
-  margin-right: -3.5px;
-}
-.pdf-mini-viewer .pdf-viewer .page .removePageBorders.scrollHorizontal .page {
-  margin-left: 5px;
-  margin-right: 5px;
-}
-.pdf-mini-viewer .pdf-viewer .page .removePageBorders.scrollWrapped .page {
-  margin-left: 5px;
-  margin-right: 5px;
-}
 .pdf-mini-viewer .pdf-viewer .page .annotation-layer {
   pointer-events: none;
 }
 .pdf-mini-viewer .pdf-viewer .page .annotation-layer section {
   pointer-events: all;
 }
-.pdf-mini-viewer .pdf-viewer .page .annotation-layer section body,
-.pdf-mini-viewer .pdf-viewer .page .annotation-layer section input,
-.pdf-mini-viewer .pdf-viewer .page .annotation-layer section textarea,
-.pdf-mini-viewer .pdf-viewer .page .annotation-layer section select,
-.pdf-mini-viewer .pdf-viewer .page .annotation-layer section button {
+.pdf-mini-viewer .pdf-viewer .page .annotation-layer section body, .pdf-mini-viewer .pdf-viewer .page .annotation-layer section input, .pdf-mini-viewer .pdf-viewer .page .annotation-layer section textarea, .pdf-mini-viewer .pdf-viewer .page .annotation-layer section select, .pdf-mini-viewer .pdf-viewer .page .annotation-layer section button {
   outline: none;
 }
-.pdf-mini-viewer .pdf-viewer .page .annotation-layer section input[type="button"] {
+.pdf-mini-viewer .pdf-viewer .page .annotation-layer section input[type=button] {
   width: 100%;
   height: 100%;
   cursor: pointer;
@@ -751,12 +664,11 @@
 .pdf-mini-viewer .pdf-viewer .page .annotation-layer section.buttonWidgetAnnotation.radioButton input {
   border: 1px solid #525659;
 }
-.pdf-mini-viewer .pdf-viewer .page .annotation-layer section.buttonWidgetAnnotation.radioButton input[type="radio"]:checked:before {
+.pdf-mini-viewer .pdf-viewer .page .annotation-layer section.buttonWidgetAnnotation.radioButton input[type=radio]:checked:before {
   top: 25%;
   left: 25%;
 }
-.pdf-mini-viewer .pdf-viewer .page .annotation-layer section.buttonWidgetAnnotation.checkBox input:disabled,
-.pdf-mini-viewer .pdf-viewer .page .annotation-layer section.buttonWidgetAnnotation.radioButton input:disabled {
+.pdf-mini-viewer .pdf-viewer .page .annotation-layer section.buttonWidgetAnnotation.checkBox input:disabled, .pdf-mini-viewer .pdf-viewer .page .annotation-layer section.buttonWidgetAnnotation.radioButton input:disabled {
   border: 1px solid #525659;
   background-color: rgba(82, 86, 89, 0.3);
   cursor: not-allowed;
@@ -768,13 +680,11 @@
   background-color: rgba(82, 86, 89, 0.3);
   cursor: not-allowed;
 }
-.pdf-mini-viewer .pdf-viewer .page .annotation-layer section.textWidgetAnnotation input,
-.pdf-mini-viewer .pdf-viewer .page .annotation-layer section.textWidgetAnnotation textarea {
+.pdf-mini-viewer .pdf-viewer .page .annotation-layer section.textWidgetAnnotation input, .pdf-mini-viewer .pdf-viewer .page .annotation-layer section.textWidgetAnnotation textarea {
   padding: 5px;
   border: 1px solid #525659;
 }
-.pdf-mini-viewer .pdf-viewer .page .annotation-layer section.textWidgetAnnotation input:disabled,
-.pdf-mini-viewer .pdf-viewer .page .annotation-layer section.textWidgetAnnotation textarea:disabled {
+.pdf-mini-viewer .pdf-viewer .page .annotation-layer section.textWidgetAnnotation input:disabled, .pdf-mini-viewer .pdf-viewer .page .annotation-layer section.textWidgetAnnotation textarea:disabled {
   border: 1px solid #525659;
   background-color: rgba(82, 86, 89, 0.3);
   cursor: not-allowed;
@@ -807,8 +717,7 @@
   -moz-box-shadow: 0px 2px 5px 0px rgba(0, 0, 0, 0.3);
   box-shadow: 0px 2px 5px 0px rgba(0, 0, 0, 0.3);
 }
-.pdf-mini-viewer .pdf-reset-form-toolbar .button .pdf-icon,
-.pdf-mini-viewer .pdf-reset-form-toolbar .button svg.pdf-icon {
+.pdf-mini-viewer .pdf-reset-form-toolbar .button .pdf-icon, .pdf-mini-viewer .pdf-reset-form-toolbar .button svg.pdf-icon {
   fill: #525659;
   color: #525659;
   width: 16px;
@@ -825,13 +734,11 @@
   line-height: 0;
   background-color: #323639;
 }
-.pdf-mini-viewer .pdf-resize-toolbar .pdf-icon,
-.pdf-mini-viewer .pdf-resize-toolbar svg.pdf-icon {
+.pdf-mini-viewer .pdf-resize-toolbar .pdf-icon, .pdf-mini-viewer .pdf-resize-toolbar svg.pdf-icon {
   fill: #f1f1f1;
   color: #f1f1f1;
 }
-.pdf-mini-viewer .pdf-resize-toolbar .pdf-icon:hover,
-.pdf-mini-viewer .pdf-resize-toolbar svg.pdf-icon:hover {
+.pdf-mini-viewer .pdf-resize-toolbar .pdf-icon:hover, .pdf-mini-viewer .pdf-resize-toolbar svg.pdf-icon:hover {
   cursor: pointer;
 }
 .pdf-mini-viewer .pdf-resize-toolbar .zoom-reset {
@@ -892,16 +799,14 @@
   margin-left: 15px;
   grid-area: nested;
 }
-.pdf-mini-viewer .pdf-outline ul a,
-.pdf-mini-viewer .pdf-outline ul .heading {
+.pdf-mini-viewer .pdf-outline ul a, .pdf-mini-viewer .pdf-outline ul .heading {
   text-decoration: none;
   border-radius: 5px;
   color: #f1f1f1;
   grid-area: link;
   padding: 5px 3px;
 }
-.pdf-mini-viewer .pdf-outline ul a:hover,
-.pdf-mini-viewer .pdf-outline ul .heading:hover {
+.pdf-mini-viewer .pdf-outline ul a:hover, .pdf-mini-viewer .pdf-outline ul .heading:hover {
   background-color: #525659;
 }
 .pdf-mini-viewer .pdf-outline ul .toggle {
@@ -909,14 +814,12 @@
   align-items: center;
   grid-area: toggle;
 }
-.pdf-mini-viewer .pdf-outline ul .toggle .pdf-icon,
-.pdf-mini-viewer .pdf-outline ul .toggle svg.pdf-icon {
+.pdf-mini-viewer .pdf-outline ul .toggle .pdf-icon, .pdf-mini-viewer .pdf-outline ul .toggle svg.pdf-icon {
   fill: #f1f1f1;
   width: 14px;
   height: 14px;
 }
-.pdf-mini-viewer .pdf-outline ul .toggle .pdf-icon:hover,
-.pdf-mini-viewer .pdf-outline ul .toggle svg.pdf-icon:hover {
+.pdf-mini-viewer .pdf-outline ul .toggle .pdf-icon:hover, .pdf-mini-viewer .pdf-outline ul .toggle svg.pdf-icon:hover {
   cursor: pointer;
 }
 .pdf-mini-viewer .pdf-outline ul .toggle .open .pdf-icon {
@@ -993,8 +896,7 @@
     -moz-box-shadow: 0px 2px 5px 0px rgba(0, 0, 0, 0.3);
     box-shadow: 0px 2px 5px 0px rgba(0, 0, 0, 0.3);
   }
-  .pdf-mini-viewer .pdf-resize-toolbar .button .pdf-icon,
-  .pdf-mini-viewer .pdf-resize-toolbar .button svg.pdf-icon {
+  .pdf-mini-viewer .pdf-resize-toolbar .button .pdf-icon, .pdf-mini-viewer .pdf-resize-toolbar .button svg.pdf-icon {
     fill: #525659;
     color: #525659;
     width: 16px;
@@ -1056,8 +958,7 @@
     -moz-box-shadow: 0px 2px 5px 0px rgba(0, 0, 0, 0.3);
     box-shadow: 0px 2px 5px 0px rgba(0, 0, 0, 0.3);
   }
-  .pdf-mini-viewer .pdf-resize-toolbar .button .pdf-icon,
-  .pdf-mini-viewer .pdf-resize-toolbar .button svg.pdf-icon {
+  .pdf-mini-viewer .pdf-resize-toolbar .button .pdf-icon, .pdf-mini-viewer .pdf-resize-toolbar .button svg.pdf-icon {
     fill: #525659;
     color: #525659;
     width: 16px;
@@ -1096,3 +997,5 @@
     opacity: 1;
   }
 }
+
+/*# sourceMappingURL=main.css.map */
