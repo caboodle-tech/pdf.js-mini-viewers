@@ -1,11 +1,11 @@
 .pdf-mini-viewer {
     position: relative;
     display: block;
-    border: 1px solid @toolbar-bg;
+    border: 1px solid $toolbar-bg;
     max-width: 1200px;
     margin: 0 auto;
     overflow: hidden;
-    .drop-shadow();
+    @include drop-shadow();
 
     .pdf-main-toolbar {
         display: flex;
@@ -13,11 +13,11 @@
         align-items: center;
         height: 50px;
         line-height: 0;
-        background-color: @toolbar-bg;
-        color: @toolbar-icon;
+        background-color: $toolbar-bg;
+        color: $toolbar-icon;
 
         .pdf-icon, svg.pdf-icon {
-            fill: @toolbar-icon;
+            fill: $toolbar-icon;
 
             &:hover {
                 cursor: pointer;
@@ -45,14 +45,14 @@
                 width: 40px;
                 padding: 3px 5px;
                 border-radius: 2px;
-                border: 1px solid lighten( @viewer-bg, 15% );
-                background-color: @viewer-bg;
+                border: 1px solid lighten( $viewer-bg, 15% );
+                background-color: $viewer-bg;
                 font-family: monospace;
                 font-size: 15px;
-                color: @toolbar-icon;
+                color: $toolbar-icon;
 
-                &::-webkit-outer-spin-button,
-                &::-webkit-inner-spin-button {
+                &::-webkit-outer-adjust-hue-button,
+                &::-webkit-inner-adjust-hue-button {
                     -webkit-appearance: none;
                     margin: 0;
                 }
@@ -108,7 +108,7 @@
         &.no-page-up {
             .page-up {
                 pointer-events: none;
-                opacity: .5;
+                opacity: 0.5;
                 cursor: not-allowed;
             }
         }
@@ -116,7 +116,7 @@
         &.no-page-down {
             .page-down {
                 pointer-events: none;
-                opacity: .5;
+                opacity: 0.5;
                 cursor: not-allowed;
             }
         }
@@ -137,7 +137,7 @@
     .pdf-viewer {
         overflow: auto;
         padding: 15px 0;
-        background-color: @viewer-bg;
+        background-color: $viewer-bg;
 
         .page {
             position: relative;
@@ -146,11 +146,10 @@
             width: 816px;
             height: 1056px;
             overflow: visible;
-            background-color: @page-bg;
-            -webkit-box-shadow: 0px 1px 3px 3px rgba(0, 0, 0, 0.2);
-            box-shadow: 0px 1px 3px 3px rgba(0, 0, 0, 0.2);
+            background-color: $page-bg;
+            @include drop-shadow(0px 1px 3px 3px, #000000, 0.2);
 
-            @import "pdfjs.less";
+            @import "pdfjs";
 
             .annotation-layer {
                 pointer-events: none; // Allow text highlighting through annotation layer.
@@ -171,12 +170,12 @@
                     &.buttonWidgetAnnotation {
                         &.checkBox {
                             input {
-                                border: 1px solid @viewer-bg;
+                                border: 1px solid $viewer-bg;
                             }
                         }
                         &.radioButton {
                             input {
-                                border: 1px solid @viewer-bg;
+                                border: 1px solid $viewer-bg;
                             }
                             input[type="radio"]:checked {
                                 &:before {
@@ -188,8 +187,8 @@
                         &.checkBox, &.radioButton {
                             input {
                                 &:disabled {
-                                    border: 1px solid @viewer-bg;
-                                    background-color: @disabled-bg;
+                                    border: 1px solid $viewer-bg;
+                                    background-color: $disabled-bg;
                                     cursor: not-allowed;
                                 }
                             }
@@ -198,10 +197,10 @@
 
                     &.choiceWidgetAnnotation {
                         select {
-                            border: 1px solid @viewer-bg;
+                            border: 1px solid $viewer-bg;
 
                             &:disabled {
-                                background-color: @disabled-bg;
+                                background-color: $disabled-bg;
                                 cursor: not-allowed;
                             }
                         }
@@ -210,11 +209,11 @@
                     &.textWidgetAnnotation {
                         input, textarea {
                             padding: 5px;
-                            border: 1px solid @viewer-bg;
+                            border: 1px solid $viewer-bg;
 
                             &:disabled {
-                                border: 1px solid @viewer-bg;
-                                background-color: @disabled-bg;
+                                border: 1px solid $viewer-bg;
+                                background-color: $disabled-bg;
                                 cursor: not-allowed;
                             }
                         }
@@ -241,18 +240,18 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            background-color: @toolbar-icon;
+            background-color: $toolbar-icon;
             border-radius: 50%;
             width: 35px;
             height: 35px;
             line-height: 35px;
             margin-bottom: 15px;
             pointer-events: auto;
-            .drop-shadow();
+            @include drop-shadow();
 
             .pdf-icon, svg.pdf-icon {
-                fill: @viewer-bg;
-                color: @viewer-bg;
+                fill: $viewer-bg;
+                color: $viewer-bg;
                 width: 16px;
                 height: 16px;
             }
@@ -269,11 +268,11 @@
         align-items: center;
         height: 50px;
         line-height: 0;
-        background-color: @toolbar-bg;
+        background-color: $toolbar-bg;
 
         .pdf-icon, svg.pdf-icon {
-            fill: @toolbar-icon;
-            color: @toolbar-icon;
+            fill: $toolbar-icon;
+            color: $toolbar-icon;
 
             &:hover {
                 cursor: pointer;
@@ -313,7 +312,7 @@
         z-index: 100;
         width: 300px;
         overflow-y: auto;
-        background-color: @toolbar-bg;
+        background-color: $toolbar-bg;
         padding: 15px;
         font-size: 15px;
         transition: right 0.55s linear;
@@ -322,7 +321,7 @@
             list-style-type: none;
             margin: 0;
             padding: 0;
-            color: @toolbar-icon;
+            color: $toolbar-icon;
 
             li {
                 display: grid;
@@ -361,12 +360,12 @@
             a, .heading {
                 text-decoration: none;
                 border-radius: 5px;
-                color: @toolbar-icon;
+                color: $toolbar-icon;
                 grid-area: link;
                 padding: 5px 3px;
 
                 &:hover {
-                    background-color: @viewer-bg;
+                    background-color: $viewer-bg;
                 }
             }
 
@@ -376,7 +375,7 @@
                 grid-area: toggle;
 
                 .pdf-icon, svg.pdf-icon {
-                    fill: @toolbar-icon;
+                    fill: $toolbar-icon;
                     width: 14px;
                     height: 14px;
         
@@ -470,18 +469,18 @@
                 justify-content: center;
                 align-items: center;
                 cursor: pointer;
-                background-color: @toolbar-icon;
+                background-color: $toolbar-icon;
                 border-radius: 50%;
                 width: 35px;
                 height: 35px;
                 line-height: 35px;
                 margin-bottom: 15px;
                 pointer-events: auto;
-                .drop-shadow();
+                @include drop-shadow();
 
                 .pdf-icon, svg.pdf-icon {
-                    fill: @viewer-bg;
-                    color: @viewer-bg;
+                    fill: $viewer-bg;
+                    color: $viewer-bg;
                     width: 16px;
                     height: 16px;
                 }
@@ -542,18 +541,18 @@
                 display: flex;
                 justify-content: center;
                 align-items: center;
-                background-color: @toolbar-icon;
+                background-color: $toolbar-icon;
                 border-radius: 50%;
                 width: 35px;
                 height: 35px;
                 line-height: 35px;
                 margin-bottom: 15px;
                 pointer-events: auto;
-                .drop-shadow();
+                @include drop-shadow();
 
                 .pdf-icon, svg.pdf-icon {
-                    fill: @viewer-bg;
-                    color: @viewer-bg;
+                    fill: $viewer-bg;
+                    color: $viewer-bg;
                     width: 16px;
                     height: 16px;
                 }
